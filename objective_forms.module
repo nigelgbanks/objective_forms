@@ -1,0 +1,10 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ * 
+ * Place holder, for the moment objective forms doesn't rely on any hooks, or cached data.
+ */
+

@@ -1,0 +1,4 @@
+; $Id$
+name = Objective Forms
+description = Provides functions and classes that allow Drupal Forms to be treated as objects.
+core = 6.x
