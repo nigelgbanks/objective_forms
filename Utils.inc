@@ -13,21 +13,6 @@ module_load_include('inc', 'php_lib', 'Reflection');
  */
 class ObjectiveFormsUtils {
 
-  function __set($name, $value) {
-    if (ObjectiveFormsUtils::isDrupalFormElement($value)) {
-      $value = ObjectiveFormsUtils::CreateFormElementFromDrupalDefintion($value);
-    }
-    else if (ObjectiveFormsUtils::isDrupalFormControl($value)) {
-      $value = ObjectiveFormsUtils::CreateFormControlFromDrupalDefintion($name, $value);
-    }
-    if (is_or_descends_from($value, 'FormElement')) {
-      $this->adopt($name, $value);
-    }
-    else if (is_or_descends_from($value, 'FormControl')) {
-      $this->setControl($value);
-    }
-  }
-
   /**
    * Converts a drupal style form element, or form control to its objective forms style.
    * 

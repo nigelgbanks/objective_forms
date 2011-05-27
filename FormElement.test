@@ -65,14 +65,12 @@ class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
     $this->assertNull($child_1->parent, 'Child no longer references parent after being orphaned.');
     $this->assertNull($form_element->child_1, 'Parent no longer references orphaned child.');
     /* Basic - Adding controls */
-    $control_1 = new FormControl('#type', 'textfield');
-    $form_element->type = $control_1;
-    $this->assertEqual($form_element->type, $control_1, 'Control set/get via __get/__set methods.');
-    $this->assertEqual($form_element['#type'], $control_1, 'Control set via __set and got via array access interface.');
-    $control_2 = new FormControl('#title', 'title');
-    $form_element['#title'] = $control_2; // Use Array interface
-    $this->assertEqual($form_element['#title'], $control_2, 'Control set via array interface and got via array interface.');
-    $this->assertEqual($form_element->title, $control_2, 'Control set via array interface and got via __get.');
+    $form_element->type = 'textfield';
+    $this->assertEqual($form_element->type, 'textfield', 'Control set/get via __get/__set methods.');
+    $this->assertEqual($form_element['#type'], 'textfield', 'Control set via __set and got via array access interface.');
+    $form_element['#title'] = 'test title'; // Use Array interface
+    $this->assertEqual($form_element['#title'], 'test title', 'Control set via array interface and got via array interface.');
+    $this->assertEqual($form_element->title, 'test title', 'Control set via array interface and got via __get.');
     /* Basic - Copying (Expected to do deep copies) */
   }
 

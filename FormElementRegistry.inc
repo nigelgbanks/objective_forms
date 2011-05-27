@@ -43,8 +43,10 @@ class FormElementRegistry {
     if (empty(self::$instance)) {
       self::$instance = new FormElementRegistry(); // Create
       module_load_include('inc', 'objective_forms', 'FormStorage');
-      $storage = FormStorage::getInstance();
-      $storage->elementRegistry = self::$instance; // Store
+      if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests.
+        $storage = FormStorage::getInstance();
+        $storage->elementRegistry = self::$instance; // Store
+      }
     }
     return self::$instance;
   }

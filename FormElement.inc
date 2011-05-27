@@ -41,9 +41,9 @@ class FormElement implements ArrayAccess {
    * @param array $controls
    * @param array $children
    */
-  public function __construct(array $controls = NULL, array $children = NULL) {
+  public function __construct(array $controls = NULL) {
     $this->controls = isset($controls) ? $controls : array();
-    $this->children = isset($children) ? $children : array();
+    $this->children = array();
     $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => spl_object_hash($this)));
     module_invoke_all('form_element_created', $this); // Some modules will want to register all created FormElements.
   }
@@ -64,8 +64,8 @@ class FormElement implements ArrayAccess {
     $original_hash = $this->hash;
     $this->hash = spl_object_hash($this); // Maintain uniqueness.
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
-    foreach ($this->control as $key => $control) { // Clone Controls.
-      $this->control[$key] = clone $control;
+    foreach ($this->controls as $key => $control) { // Clone Controls.
+      $this->controls[$key] = clone $control;
     }
     foreach ($this->children as $key => $child) { // Clone Children.
       $this->children[$key] = clone $child;
@@ -94,12 +94,14 @@ class FormElement implements ArrayAccess {
   public function eachControl($function) {
     $args = func_get_args();
     array_shift($args); // Remove function argument
-    foreach ($this->control as $control) {
+    foreach ($this->controls as $key => $control) {
       array_unshift($control, $args);
+      array_unshift($key, $args);
       if (call_user_func_array($function, $args) == FALSE) {
         return;
       }
-      array_shift($args);
+      array_shift($args); // $control
+      array_shift($args); // $key
     }
   }
 
@@ -133,12 +135,12 @@ class FormElement implements ArrayAccess {
    */
   public function __get($name) {
     if ($this->protected->exists($name)) {
-      return $this->protected->get($name);
+      return $this->protected->$name;
     }
-    else if ($this->offsetExists($name)) {
+    else if ($this->offsetExists($name)) { // Child
       return $this->offsetGet($name);
     }
-    else if ($this->offsetExists("#$name")) { // Check controls with the leading '#'
+    else if ($this->offsetExists("#$name")) { // Control
       return $this->offsetGet("#$name");
     }
     return NULL;
@@ -152,10 +154,10 @@ class FormElement implements ArrayAccess {
    */
   public function __set($name, $value) {
     if ($this->protected->exists($name)) {
-      return $this->protected->set($name, $value);
+      $this->protected->$name = $value;
     }
     else {
-      $name = is_or_descends_from($value, 'FormControl') ? "#$name" : $name;
+      $name = is_or_descends_from($value, 'FormElement') ? $name : "#$name";
       $this->offsetSet($name, $value);
     }
   }
@@ -168,7 +170,10 @@ class FormElement implements ArrayAccess {
    * @return boolean
    */
   public function __isset($name) {
-    return ($this->$name != NULL);
+    if ($this->protected->exists($name)) {
+      return isset($this->protected->$name);
+    }
+    return $this->offsetExists($name);
   }
 
   /**
@@ -177,10 +182,13 @@ class FormElement implements ArrayAccess {
    * @param mixed $name 
    */
   public function __unset($name) {
-    if ($this->offsetExists($name)) {
+    if ($this->protected->exists($name)) {
+      unset($this->protected->$name);
+    }
+    else if ($this->offsetExists($name)) { // Child
       $this->offsetUnset($name);
     }
-    else if ($this->offsetExists("#$name")) { // Check controls with the leading '#'
+    else if ($this->offsetExists("#$name")) { // Control
       $this->offsetUnset("#$name");
     }
   }
@@ -192,12 +200,9 @@ class FormElement implements ArrayAccess {
    * @return boolean
    */
   public function offsetExists($offset) {
-    $child_exists = array_key_exists($offset, $this->children);
-    $control_exists = array_key_exists($offset, $this->controls);
-    if ($child_exists || $control_exists) {
-      return TRUE;
-    }
-    return FALSE;
+    $child_exists = isset($this->children[$offset]);
+    $control_exists = isset($this->controls[$offset]);
+    return $child_exists || $control_exists;
   }
 
   /**
@@ -208,12 +213,14 @@ class FormElement implements ArrayAccess {
    *   If found, this function will return either a child FormElement or a FormControl.
    */
   public function offsetGet($offset) {
+    // Children
     $child_exists = array_key_exists($offset, $this->children);
-    $control_exists = array_key_exists($offset, $this->controls);
     if ($child_exists) {
       return $this->children[$offset];
     }
-    else if ($control_exists) {
+    // Controls
+    $control_exists = array_key_exists($offset, $this->controls);
+    if ($control_exists) {
       return $this->controls[$offset];
     }
     return NULL;
@@ -230,8 +237,8 @@ class FormElement implements ArrayAccess {
     if (is_or_descends_from($value, 'FormElement')) {
       $this->adopt($offset, $value);
     }
-    else if (is_or_descends_from($value, 'FormControl')) {
-      $this->setControl($offset, $value);
+    else if (element_property($offset)) {
+      $this->controls[$offset] = $value;
     }
   }
 
@@ -241,13 +248,11 @@ class FormElement implements ArrayAccess {
    * @param mixed $offset 
    */
   public function offsetUnset($offset) {
-    $child_exists = array_key_exists($offset, $this->children);
-    $control_exists = array_key_exists($offset, $this->controls);
-    if ($child_exists) {
+    if (isset($this->children[$offset])) {
       unset($this->children[$offset]);
     }
-    else if ($control_exists) {
-      unset($this->control[$offset]);
+    else if (isset($this->controls[$offset])) {
+      unset($this->controls[$offset]);
     }
   }
 
@@ -344,10 +349,9 @@ class FormElement implements ArrayAccess {
    * @return array
    */
   public function toArray() {
-    $output = array();
-    foreach ($this->controls as $key => $control) {
-      var_dump($key, $control);
-      $output[$control->name] = $control->value;
+    $output = $this->controls;
+    foreach ($this->children as $name => $child) {
+      $output[$name] = $child->toArray();
     }
     return $output;
   }

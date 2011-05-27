@@ -33,10 +33,19 @@ class FormStorage {
    * @return FormStorage
    */
   public static function initialize(array &$form_state) {
-    if (empty(self::$instance)) {
+    if (!self::isInitialized()) {
       self::$instance = new FormStorage($form_state);
     }
     return self::$instance;
+  }
+
+  /**
+   * Checks if the FormStorage singleton has been initialized.
+   * 
+   * @return boolean
+   */
+  public static function isInitialized() {
+    return isset(self::$instance);
   }
 
   /**
@@ -45,7 +54,7 @@ class FormStorage {
    * @return FormStorage
    */
   public static function getInstance() {
-    if (empty(self::$instance)) {
+    if (!self::isInitialized()) {
       throw new Exception('Attempted to get FormStorage instance without first initializing it.');
     }
     return self::$instance;

@@ -32,6 +32,11 @@ class Form implements ArrayAccess {
    */
   public $storage;
   /**
+   *
+   * @var FormElementRegistry
+   */
+  public $registry;
+  /**
    * The FormElements that make up the form.
    * 
    * @var array
@@ -69,7 +74,7 @@ class Form implements ArrayAccess {
     $this->form_state = &$form;
     $this->elements = array();
     $this->storage = FormStorage::initialize($form_state);
-    $this->elementRegistry = FormElementRegistry::getInstance();
+    $this->registry = FormElementRegistry::getInstance();
   }
 
   /**
