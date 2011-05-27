@@ -12,7 +12,7 @@
 /**
  * An collection object that comprises all the FormElements in a form.
  */
-class Form {
+class Form implements ArrayAccess {
 
   /**
    * The Drupal Form API defined form from which this object was inialized.
@@ -21,15 +21,20 @@ class Form {
    */
   protected $form;
   /**
-   * The drupal form state.
+   * The Drupal form state.
    * 
    * @var array
    */
   protected $form_state;
   /**
+   *
+   * @var FormStorage
+   */
+  public $storage;
+  /**
    * The FormElements that make up the form.
    * 
-   * @var FormElement
+   * @var array
    */
   public $elements;
 
@@ -38,7 +43,7 @@ class Form {
    * @param array $form 
    */
   public static function isValidDrupalForm(array &$form) {
-    return TRUE;
+    return TRUE; // TODO implement??
   }
 
   /**
@@ -48,7 +53,7 @@ class Form {
    */
   public static function createEmptyForm(array &$form_state) {
     $form = array();
-    return new Form($form, $form_state);
+    return new Form($form, $form_state); // In this nesscary?
   }
 
   /**
@@ -58,38 +63,85 @@ class Form {
    * @param array $form_state 
    */
   public function __construct(array &$form, array &$form_state) {
-    $this->form = $form; // Is a copy, subsequent changes to the form will not be reflected in the Form Object.
+    module_load_include('inc', 'objective_forms', 'FormStorage');
+    module_load_include('inc', 'objective_forms', 'FormElementRegistry');
+    $this->form = $form; // Is a copy, subsequent changes to the Drupal form will not be reflected in the Form.
     $this->form_state = &$form;
-    $this->initialize();
+    $this->elements = array();
+    $this->storage = FormStorage::initialize($form_state);
+    $this->elementRegistry = FormElementRegistry::getInstance();
   }
 
   /**
-   * Initialize the Form object.
+   * 
+   * @param mixed $name
+   * @return boolean
    */
-  private function initialize() {
-    if (self::isValidDrupalForm($this->form)) {
-      $this->initializeFromDrupalForm();
-    }
-    else {
-      $this->initializeEmptyForm();
-    }
+  public function __isset($name) {
+    return $this->offsetExists($name);
   }
 
   /**
-   * Initializes the Form object from a Drupal Form API form.
+   *
+   * @param mixed $name 
    */
-  private function initializeFromDrupalForm() {
-    $childern_keys = element_children($this->form);
-    foreach($childern_keys as $key) {
-      $this->form[$key];
-    }
+  public function __unset($name) {
+    return $this->offsetUnset($name);
   }
 
   /**
-   * Initializes the empty form by creating the root element.
+   *
+   * @param mixed $name 
    */
-  private function initializeEmptyForm() {
-    $this->elements = $this->createElement();
+  public function __get($name) {
+    return $this->offsetGet($name);
+  }
+
+  /**
+   *
+   * @param mixed $name
+   * @param mixed $value 
+   */
+  public function __set($name, $value) {
+    return $this->offsetSet($name, $value);
+  }
+
+  /**
+   *
+   * @param mixed $offset 
+   */
+  public function offsetExists($offset) {
+    return isset($this->elements[$offset]);
+  }
+
+  /**
+   * 
+   * @param mixed $offset 
+   * @return mixed
+   */
+  public function offsetGet($offset) {
+    if ($this->offsetExists($offset)) {
+      return $this->elements[$offset];
+    }
+    return NULL;
+  }
+
+  /**
+   * 
+   * @param mixed $offset
+   * @param mixed $value 
+   */
+  public function offsetSet($offset, $value) {
+    $this->elements[$offset] = $value;
+  }
+
+  /**
+   * Removes the child or control identified by $offset if found.
+   * 
+   * @param mixed $offset 
+   */
+  public function offsetUnset($offset) {
+    unset($this->elements[$offset]);
   }
 
   /**
@@ -99,18 +151,27 @@ class Form {
    * @param $children
    * 
    * @return FormElement
-   */
-  protected function createElement(array $controls = NULL, array $children = NULL) {
+   *
+    protected function createElement(array $controls = NULL, array $children = NULL) {
     return new FormElement($controls, $children);
-  }
+    } */
 
   /**
-   * Outputs the form as an array, which can be used by the Drupal Form API
+   * Outputs the form as an array, which can be used by the Drupal Form API.
    * 
    * @return array
    */
   public function toArray() {
-    return $this->elements->toArray();
+    $output = array();
+    foreach ($this->elements as $key => $element) {
+      if (is_or_descends_from($element, 'FormElement')) {
+        $output[$key] = $element->toArray();
+      }
+      else {
+        $output[$key] = $element; // Property of the form.
+      }
+    }
+    return $output;
   }
 
 }

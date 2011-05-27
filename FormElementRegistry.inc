@@ -34,21 +34,33 @@ class FormElementRegistry {
   /**
    * Creates a singleton reference to the registry.
    * 
+   * Stores a new FormElementRegistry in the form storage.
+   * 
    * @staticvar Registry $instance
    * @return Registry 
    */
   public static function getInstance() {
     if (empty(self::$instance)) {
-      self::$instance = new FormElementRegistry();
+      self::$instance = new FormElementRegistry(); // Create
+      module_load_include('inc', 'objective_forms', 'FormStorage');
+      $storage = FormStorage::getInstance();
+      $storage->elementRegistry = self::$instance; // Store
     }
     return self::$instance;
   }
 
   /**
-   * Creates Registry.
+   * Creates FormElementRegistry.
    */
   private function __construct() {
     $this->elements = array();
+  }
+
+  /**
+   * Set the instance on wakeup.
+   */
+  public function __wakeup() {
+    self::$instance = $this;
   }
 
   /**
@@ -67,6 +79,10 @@ class FormElementRegistry {
   public function registerClone($original_hash, FormElement $clone) {
     $this->cloned[$created->hash] = $original_hash;
     $this->elements[$clone->hash] = $cloned;
+  }
+
+  public function registerDestroyed($hash) {
+    // @todo Implement... Should this ever get called? Since this class holds references to every object created.
   }
 
   /**

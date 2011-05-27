@@ -9,7 +9,7 @@
 module_load_include('inc', 'php_lib', 'ReflectionHelpers');
 module_load_include('inc', 'php_lib', 'ReadOnlyProtectedMembers');
 module_load_include('inc', 'objective_forms', 'Utils');
-module_load_include('inc', 'objective_forms', 'FormControl');
+//module_load_include('inc', 'objective_forms', 'FormControl');
 
 /**
  * Form Element Class.
@@ -37,6 +37,9 @@ class FormElement implements ArrayAccess {
 
   /**
    * Creates a Empty Form Element.
+   * 
+   * @param array $controls
+   * @param array $children
    */
   public function __construct(array $controls = NULL, array $children = NULL) {
     $this->controls = isset($controls) ? $controls : array();
@@ -49,7 +52,7 @@ class FormElement implements ArrayAccess {
    * Called when this object is destroyed.
    */
   public function __destruct() {
-    module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to unregister any destroyed FormElements.
+    module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to be notified of any destroyed FormElements.
   }
 
   /**
@@ -119,7 +122,7 @@ class FormElement implements ArrayAccess {
    * 
    */
   public function __toString() {
-    // For each control and each child, treat them as a string pack into an array and do a print_r.
+    // Implement for debug purposes.
   }
 
   /**
@@ -256,6 +259,7 @@ class FormElement implements ArrayAccess {
    */
   private function setControl($offset, FormControl $control) {
     if (isset($offset)) {
+      var_dump($control);
       $this->controls[$offset] = $control;
     } // Controls are not indexed values EVAR!.
   }
@@ -335,11 +339,17 @@ class FormElement implements ArrayAccess {
     return NULL;
   }
 
+  /**
+   *
+   * @return array
+   */
   public function toArray() {
     $output = array();
-    foreach ($this->controls as $control) {
-      $output[$control->name];
+    foreach ($this->controls as $key => $control) {
+      var_dump($key, $control);
+      $output[$control->name] = $control->value;
     }
+    return $output;
   }
 
 }
