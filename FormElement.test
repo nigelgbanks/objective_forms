@@ -4,6 +4,83 @@
 
 /**
  * @file
- *
+ * 
+ * Unit Tests.
  */
 
+/**
+ * Unit Tests for the FormControl class.
+ */
+class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
+
+  /**
+   * Get Test info.
+   * 
+   * @return array
+   *   Properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Form Element Unit Tests.',
+      'description' => 'Unit tests for FormElement.inc.',
+      'group' => 'Objective Forms',
+    );
+  }
+
+  /**
+   * setUp() performs any pre-requisite tasks that need to happen. 
+   */
+  public function setUp() {
+    // Enable any modules required for the test.
+    parent::setUp('objective_forms');
+    module_load_include('inc', 'objective_forms', 'FormElement');
+  }
+
+  /**
+   * Test constructing the Form definition.
+   */
+  public function testCreate() {
+    /* Basic - Empty FormElement */
+    $form_element = new FormElement();
+    $this->assertNotNull($form_element, 'Created basic FormElement.');
+    $this->assertNotNull($form_element->controls, 'The FormElement\'s  FormControl\'s are accessible.');
+    $this->assertNotNull($form_element->children, 'The FormElement\'s  Child FormElement\'s are accessible.');
+    $this->assertEqual(count($form_element->controls), 0, 'Empty Set of Controls created.');
+    $this->assertEqual(count($form_element->controls), 0, 'Empty Set of Children created.');
+    $this->assertNull($form_element->parent, 'FormElement\'s parent FormElement is undefined.');
+    /* Basic - Adding children aka Adopting */
+    $child_1 = new FormElement();
+    $form_element->child_1 = $child_1; // Use __set
+    $this->assertEqual($form_element->child_1, $child_1, 'Child element set/get via __get/__set methods.');
+    $this->assertEqual($form_element['child_1'], $child_1, 'Child element set via __set and got via array access interface.');
+    $child_2 = new FormElement();
+    $form_element['child_2'] = $child_2; // Use Array interface
+    $this->assertEqual($form_element['child_2'], $child_2, 'Child element set via array interface and got via array interface.');
+    $this->assertEqual($form_element->child_2, $child_2, 'Child element set via array interface and got via __get.');
+    /* Basic - Parents set correctly */
+    $this->assertIdentical($form_element, $child_1->parent, 'Child element\'s parent set correctly from __set.');
+    $this->assertIdentical($form_element, $child_2->parent, 'Child element\'s parent set correctly from array interface.');
+    /* Basic - Orphaning Children */
+    $child_1->orphan();
+    $this->assertNull($child_1->parent, 'Child no longer references parent after being orphaned.');
+    $this->assertNull($form_element->child_1, 'Parent no longer references orphaned child.');
+    /* Basic - Adding controls */
+    $control_1 = new FormControl('#type', 'textfield');
+    $form_element->type = $control_1;
+    $this->assertEqual($form_element->type, $control_1, 'Control set/get via __get/__set methods.');
+    $this->assertEqual($form_element['#type'], $control_1, 'Control set via __set and got via array access interface.');
+    $control_2 = new FormControl('#title', 'title');
+    $form_element['#title'] = $control_2; // Use Array interface
+    $this->assertEqual($form_element['#title'], $control_2, 'Control set via array interface and got via array interface.');
+    $this->assertEqual($form_element->title, $control_2, 'Control set via array interface and got via __get.');
+    /* Basic - Copying (Expected to do deep copies) */
+  }
+
+  /**
+   * Test creating drupal forms.
+   */
+  function testToDrupalForm() {
+    
+  }
+
+}

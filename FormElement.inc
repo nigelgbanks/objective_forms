@@ -6,25 +6,34 @@
  * @file
  *
  */
+module_load_include('inc', 'php_lib', 'ReflectionHelpers');
+module_load_include('inc', 'php_lib', 'ReadOnlyProtectedMembers');
 module_load_include('inc', 'objective_forms', 'Utils');
+module_load_include('inc', 'objective_forms', 'FormControl');
 
 /**
- * 
+ * Form Element Class.
  */
 class FormElement implements ArrayAccess {
 
   /**
-   * Hash used to uniquely identify this FormElement.
+   * Hash used to uniquely identify this FormElement. Accessible via 'hash'.
    * 
    * @var hash
    */
-  protected $hash;
+  //protected $_hash;
   /**
-   * The parent of this FormElement may be NULL.
+   * The parent of this FormElement may be NULL. Accessible via 'parent'.
    * 
    * @var FormElement
    */
-  protected $parent;
+  //protected $parent;
+  /**
+   * Holds references to protected variables. Allows for external access.
+   * 
+   * @var array
+   */
+  protected $protected;
   /**
    * Child Form Elements
    * 
@@ -44,20 +53,65 @@ class FormElement implements ArrayAccess {
   public function __construct() {
     $this->children = array();
     $this->controls = array();
+    $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => spl_object_hash($this)));
+    module_invoke_all('form_element_created', $this->hash, $this); // Some modules will want to register all created FormElements.
+  }
+
+  /**
+   * Called when this object is destroyed.
+   */
+  public function __destruct() {
+    // $this->eachChild(array($this, 'orphan')); how to ?
+    //$this->orphan();
+    //module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to unregister any destroyed FormElements.
+  }
+
+  /**
+   * Clone this FormElement. 
+   * 
+   * Performs a deep clone on controls and children. The cloned element wont have a parent.
+   */
+  public function __clone() {
+    $original_hash = $this->hash;
+    $this->_hash = spl_object_hash($this); // Maintain uniqueness.
+    $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
+    foreach ($this->control as $key => $control) { // Clone Controls.
+      $this->control[$key] = clone $control;
+    }
+    foreach ($this->children as $key => $child) { // Clone Children.
+      $this->children[$key] = clone $child;
+    }
+    module_invoke_all('form_element_cloned', $original_hash, $this->hash, $this); // Some modules will want to register all cloned FormElements.
   }
 
   /**
    * Takes a function applies it to each child.
    */
-  public function eachChild($func) {
-    
+  public function eachChild($function) {
+    $args = func_get_args();
+    array_shift($args); // Remove function argument
+    foreach ($this->children as $child) {
+      array_unshift($child, $args);
+      if (call_user_func_array($function, $args) == FALSE) {
+        return;
+      }
+      array_shift($args);
+    }
   }
 
   /**
    * Takes a function applies it to each control.
    */
-  public function eachControl() {
-    
+  public function eachControl($function) {
+    $args = func_get_args();
+    array_shift($args); // Remove function argument
+    foreach ($this->control as $control) {
+      array_unshift($control, $args);
+      if (call_user_func_array($function, $args) == FALSE) {
+        return;
+      }
+      array_shift($args);
+    }
   }
 
   /**
@@ -65,8 +119,14 @@ class FormElement implements ArrayAccess {
    * 
    * @return iterator
    */
-  public function eachDecendant() {
-    
+  public function eachDecendant($function) {
+    $args = func_get_args();
+    array_shift($args); // Remove function argument
+    foreach ($this->children as $child) {
+      if (call_user_func_array($function, $args) == FALSE) {
+        return;
+      }
+    }
   }
 
   /**
@@ -83,6 +143,9 @@ class FormElement implements ArrayAccess {
    * @return mixed
    */
   public function __get($name) {
+    if ($this->protected->exists($name)) {
+      return $this->protected->get($name);
+    }
     if ($this->offsetExists($name)) {
       return $this->offsetGet($name);
     }
@@ -99,8 +162,13 @@ class FormElement implements ArrayAccess {
    * @param mixed $value 
    */
   public function __set($name, $value) {
-    $name = is_decendant($value, 'FormControl') ? "#$name" : $name;
-    $this->offsetSet($name, $value);
+    if ($this->protected->exists($name)) {
+      return $this->protected->set($name, $value);
+    }
+    else {
+      $name = is_or_descends_from($value, 'FormControl') ? "#$name" : $name;
+      $this->offsetSet($name, $value);
+    }
   }
 
   /**
@@ -157,7 +225,7 @@ class FormElement implements ArrayAccess {
       return $this->children[$offset];
     }
     else if ($control_exists) {
-      return $this->control[$offset];
+      return $this->controls[$offset];
     }
     return NULL;
   }
@@ -170,10 +238,10 @@ class FormElement implements ArrayAccess {
    *   Either a FormElement or a FormControl, all other values will be ignored.
    */
   public function offsetSet($offset, $value) {
-    if (is_decendant($value, 'FormElement')) {
-      $this->setChild($offset, $value);
+    if (is_or_descends_from($value, 'FormElement')) {
+      $this->adopt($offset, $value);
     }
-    else if (is_decendant($value, 'FormControl')) {
+    else if (is_or_descends_from($value, 'FormControl')) {
       $this->setControl($offset, $value);
     }
   }
@@ -195,22 +263,6 @@ class FormElement implements ArrayAccess {
   }
 
   /**
-   * Sets a child to this form element.
-   * 
-   * @param mixed $offset
-   * @param FormElement $child 
-   */
-  private function setChild($offset, FormElement $child) {
-    $value->setParent($parent);
-    if (isset($offset)) {
-      $this->children[$offset] = $value;
-    }
-    else {
-      $this->children[] = $value;
-    }
-  }
-
-  /**
    * Sets a control to this form element.
    * 
    * @param mixed $offset
@@ -218,8 +270,83 @@ class FormElement implements ArrayAccess {
    */
   private function setControl($offset, FormControl $control) {
     if (isset($offset)) {
-      $this->control[$offset] = $value;
+      $this->controls[$offset] = $control;
     } // Controls are not indexed values EVAR!.
+  }
+
+  /**
+   * Adopt the given child. Forcefully removing from its original home.
+   * 
+   * @param mixed $offse
+   * @param FormElement $child
+   */
+  private function adopt($offset = NULL, FormElement $child) {
+    $child->setParent($this);
+    if (isset($offset)) {
+      $this->children[$offset] = $child;
+    }
+    else {
+      $this->children[] = $child;
+    }
+    $child->parent = $this;
+  }
+
+  /**
+   * Sets this elements parent, ditching its previous parents.
+   * 
+   * @param FormElement
+   */
+  private function setParent(FormElement $parent) {
+    $this->orphan();
+    $this->parent = $parent;
+  }
+
+  /**
+   * Removes this element from its parent element.
+   * 
+   * @return boolean
+   *   TRUE if the element was orphaned FALSE otherwise.
+   */
+  public function orphan() {
+    if (isset($this->parent)) {
+      $was_orphaned = $this->parent->orphanChild($this);
+      unset($this->parent);
+      return $was_orphaned;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Removes the child element defined by $remove from this FormElement. 
+   * 
+   * @param FormElement $remove
+   *   The child to remove
+   * 
+   * @return boolean
+   *   TRUE if the child was removed, FALSE otherwise.
+   */
+  private function orphanChild(FormElement $remove) {
+    foreach ($this->children as $index => $child) {
+      if ($remove === $child) {
+        unset($this->children[$index]);
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
+   * Get's the index of this element in its parent's children array if it has a parent.
+   */
+  public function getIndex() {
+    if (isset($this->parent)) {
+      foreach ($this->parent->children as $index => $child) {
+        if ($child === $this) {
+          return $index;
+        }
+      }
+    }
+    return NULL;
   }
 
 }
