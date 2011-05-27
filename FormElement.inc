@@ -17,18 +17,6 @@ module_load_include('inc', 'objective_forms', 'FormControl');
 class FormElement implements ArrayAccess {
 
   /**
-   * Hash used to uniquely identify this FormElement. Accessible via 'hash'.
-   * 
-   * @var hash
-   */
-  //protected $_hash;
-  /**
-   * The parent of this FormElement may be NULL. Accessible via 'parent'.
-   * 
-   * @var FormElement
-   */
-  //protected $parent;
-  /**
    * Holds references to protected variables. Allows for external access.
    * 
    * @var array
@@ -50,20 +38,18 @@ class FormElement implements ArrayAccess {
   /**
    * Creates a Empty Form Element.
    */
-  public function __construct() {
-    $this->children = array();
-    $this->controls = array();
+  public function __construct(array $controls = NULL, array $children = NULL) {
+    $this->controls = isset($controls) ? $controls : array();
+    $this->children = isset($children) ? $children : array();
     $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => spl_object_hash($this)));
-    module_invoke_all('form_element_created', $this->hash, $this); // Some modules will want to register all created FormElements.
+    module_invoke_all('form_element_created', $this); // Some modules will want to register all created FormElements.
   }
 
   /**
    * Called when this object is destroyed.
    */
   public function __destruct() {
-    // $this->eachChild(array($this, 'orphan')); how to ?
-    //$this->orphan();
-    //module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to unregister any destroyed FormElements.
+    module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to unregister any destroyed FormElements.
   }
 
   /**
@@ -73,7 +59,7 @@ class FormElement implements ArrayAccess {
    */
   public function __clone() {
     $original_hash = $this->hash;
-    $this->_hash = spl_object_hash($this); // Maintain uniqueness.
+    $this->hash = spl_object_hash($this); // Maintain uniqueness.
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
     foreach ($this->control as $key => $control) { // Clone Controls.
       $this->control[$key] = clone $control;
@@ -81,7 +67,7 @@ class FormElement implements ArrayAccess {
     foreach ($this->children as $key => $child) { // Clone Children.
       $this->children[$key] = clone $child;
     }
-    module_invoke_all('form_element_cloned', $original_hash, $this->hash, $this); // Some modules will want to register all cloned FormElements.
+    module_invoke_all('form_element_cloned', $original_hash, $this); // Some modules will want to register all cloned FormElements.
   }
 
   /**
@@ -146,7 +132,7 @@ class FormElement implements ArrayAccess {
     if ($this->protected->exists($name)) {
       return $this->protected->get($name);
     }
-    if ($this->offsetExists($name)) {
+    else if ($this->offsetExists($name)) {
       return $this->offsetGet($name);
     }
     else if ($this->offsetExists("#$name")) { // Check controls with the leading '#'
@@ -347,6 +333,13 @@ class FormElement implements ArrayAccess {
       }
     }
     return NULL;
+  }
+
+  public function toArray() {
+    $output = array();
+    foreach ($this->controls as $control) {
+      $output[$control->name];
+    }
   }
 
 }

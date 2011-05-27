@@ -13,11 +13,11 @@
 class FormControl {
 
   /**
-   * The name of this form control.
+   * Read only protected member variables.
    * 
    * @var string
    */
-  protected $name;
+  protected $protected;
   /**
    * The value for this form control.
    * 
@@ -43,7 +43,7 @@ class FormControl {
    */
   public function __construct($name, $value) {
     if (self::validName($name)) {
-      $this->name = $name;
+      $this->protected = new ReadOnlyProtectedMembers(array('name' => $name));
       $this->value = $value;
     }
     else {

@@ -34,6 +34,14 @@ class Form {
   public $elements;
 
   /**
+   *
+   * @param array $form 
+   */
+  public static function isValidDrupalForm(array &$form) {
+    return TRUE;
+  }
+
+  /**
    * Creates a Form object without a Drupal Form API form.
    * 
    * @param array $form_state 
@@ -71,7 +79,10 @@ class Form {
    * Initializes the Form object from a Drupal Form API form.
    */
   private function initializeFromDrupalForm() {
-    // @todo Implement
+    $childern_keys = element_children($this->form);
+    foreach($childern_keys as $key) {
+      $this->form[$key];
+    }
   }
 
   /**
@@ -83,10 +94,14 @@ class Form {
 
   /**
    * Meant to be overloaded by child classes so they can provide thier own implementation of FormElement.
+   * 
+   * @param $controls
+   * @param $children
+   * 
    * @return FormElement
    */
-  protected function createElement() {
-    return new FormElement();
+  protected function createElement(array $controls = NULL, array $children = NULL) {
+    return new FormElement($controls, $children);
   }
 
   /**
