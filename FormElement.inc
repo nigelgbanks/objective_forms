@@ -62,10 +62,16 @@ class FormElement implements ArrayAccess {
    */
   public function __clone() {
     $original_hash = $this->hash;
+    $this->protected = clone $this->protected;
     $this->hash = spl_object_hash($this); // Maintain uniqueness.
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
     foreach ($this->controls as $key => $control) { // Clone Controls.
-      $this->controls[$key] = clone $control;
+      if (is_array($control)) {
+        $this->controls[$key] = array_copy_recursive($control);
+      }
+      else if (is_object($control)) {
+        $this->controls[$key] = clone $control;
+      }
     }
     foreach ($this->children as $key => $child) { // Clone Children.
       $this->children[$key] = clone $child;
@@ -292,7 +298,7 @@ class FormElement implements ArrayAccess {
    * @param FormElement
    */
   private function setParent(FormElement $parent) {
-    $this->orphan();
+    $this->orphan(); // There can only be one.
     $this->parent = $parent;
   }
 

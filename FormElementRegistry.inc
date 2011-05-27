@@ -79,8 +79,8 @@ class FormElementRegistry {
    * @param FormElement $clone 
    */
   public function registerClone($original_hash, FormElement $clone) {
-    $this->cloned[$created->hash] = $original_hash;
-    $this->elements[$clone->hash] = $cloned;
+    $this->registerCreated($clone); // Clone's also count as created elements.
+    $this->setAncestory($clone, $original_hash);
   }
 
   public function registerDestroyed($hash) {
@@ -131,6 +131,32 @@ class FormElementRegistry {
       return isset($this->cloned[$hash][$depth]);
     }
     return FALSE;
+  }
+
+  /**
+   * Get's the history of a particular form element.
+   * 
+   * @param hash $hash
+   * @return array 
+   *   The form elements history.
+   */
+  public function getAncestory($hash) {
+    if ($this->isClone($hash)) {
+      return $this->cloned[$hash];
+    }
+    return array();
+  }
+
+  /**
+   * Sets the history for a given element and the hash of the element in which it was cloned from.
+   * 
+   * @param FormElement $clone
+   * @param hash $original_hash 
+   */
+  public function setAncestory(FormElement $clone, $original_hash) {
+    $ancestory = $this->getAncestory($original_hash);
+    array_unshift($ancestory, $original_hash);
+    $this->cloned[$clone->hash] = $ancestory;
   }
 
   /**
