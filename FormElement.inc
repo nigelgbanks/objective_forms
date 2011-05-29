@@ -50,10 +50,10 @@ class FormElement implements ArrayAccess {
 
   /**
    * Called when this object is destroyed.
-   */
+   *
   public function __destruct() {
     module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to be notified of any destroyed FormElements.
-  }
+  }*/
 
   /**
    * Clone this FormElement. 
@@ -140,7 +140,7 @@ class FormElement implements ArrayAccess {
    * @return mixed
    */
   public function __get($name) {
-    if ($this->protected->exists($name)) {
+    if ($this->protected->has($name)) {
       return $this->protected->$name;
     }
     else if ($this->offsetExists($name)) { // Child
@@ -159,7 +159,7 @@ class FormElement implements ArrayAccess {
    * @param mixed $value 
    */
   public function __set($name, $value) {
-    if ($this->protected->exists($name)) {
+    if ($this->protected->has($name)) {
       $this->protected->$name = $value;
     }
     else {
@@ -176,7 +176,7 @@ class FormElement implements ArrayAccess {
    * @return boolean
    */
   public function __isset($name) {
-    if ($this->protected->exists($name)) {
+    if ($this->protected->has($name)) {
       return isset($this->protected->$name);
     }
     return $this->offsetExists($name);
@@ -188,7 +188,7 @@ class FormElement implements ArrayAccess {
    * @param mixed $name 
    */
   public function __unset($name) {
-    if ($this->protected->exists($name)) {
+    if ($this->protected->has($name)) {
       unset($this->protected->$name);
     }
     else if ($this->offsetExists($name)) { // Child

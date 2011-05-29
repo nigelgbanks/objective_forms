@@ -6,6 +6,7 @@
  * @file
  *
  */
+module_load_include('inc', 'objective_forms', 'FormElement');
 
 /**
  * Class that holds a flat array of all FormElements.
@@ -43,7 +44,7 @@ class FormElementRegistry {
     if (empty(self::$instance)) {
       self::$instance = new FormElementRegistry(); // Create
       module_load_include('inc', 'objective_forms', 'FormStorage');
-      if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests.
+      if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests. But should during normal use.
         $storage = FormStorage::getInstance();
         $storage->elementRegistry = self::$instance; // Store
       }
@@ -170,7 +171,8 @@ class FormElementRegistry {
    */
   public function getAncestor($hash, $depth) {
     if ($this->hasAncestor($hash, $depth)) {
-      return $this->cloned[$hash][$depth];
+      $ancestor_hash = $this->cloned[$hash][$depth];
+      return $this->get($ancestor_hash);
     }
     return NULL;
   }
@@ -186,7 +188,8 @@ class FormElementRegistry {
   public function getOriginal($hash) {
     if ($this->isClone($hash)) {
       $length = count($this->cloned[$hash]);
-      return $this->cloned[$hash][$length - 1];
+      $original_hash = $this->cloned[$hash][$length - 1];
+      return $this->get($original_hash);
     }
     return $this->get($hash);
   }
