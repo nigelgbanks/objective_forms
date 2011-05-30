@@ -29,6 +29,16 @@ class FormValues {
   protected $tracker;
 
   /**
+   * Checks to see if any form values were submitted to the server.
+   * 
+   * @param array $form_state
+   * @return boolean
+   */
+  public static function Exists(array &$form_state) {
+    return isset($form_state['values']);
+  }
+
+  /**
    * Create a FormValues object.
    * 
    * @param array $form_state
@@ -38,7 +48,7 @@ class FormValues {
    */
   public function __construct(array &$form_state, FormElement $element) {
     $this->values = array();
-    if (isset($form_state['values'])) {
+    if (self::Exists($form_state)) {
       $this->tracker = new FormValueTracker($form_state['values']);
       $this->setValues($root, $this->tracker);
     }
@@ -70,21 +80,32 @@ class FormValues {
   }
 
   /**
+   * Is there a value associated with the given form element.
+   * 
+   * @param hash $hash 
+   * @return boolean
+   */
+  public function hasValue($hash) {
+    return isset($this->values[$hash]);
+  }
+
+  /**
    * Get the value associated with the given FormElement.
    * 
-   * @param FormElement $element
+   * @param hash $hash
    * @return mixed
    *   The submitted value for the given FormElement if found otherwise NULL.
    */
-  public function getValue(FormElement $element) {
-    if (isset($this->values[$element->hash])) {
-      return $this->values[$element->hash];
+  public function getValue($hash) {
+    if ($this->hasValue($hash)) {
+      return $this->values[$hash];
     }
     return NULL;
   }
 
   /**
-   *
+   * Returns all values.
+   * 
    * @return array 
    */
   public function getValues() {
