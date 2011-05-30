@@ -39,7 +39,7 @@ class ObjectiveForms_Form_TestCase extends DrupalUnitTestCase {
     $form_state = array();
     $form = new Form($form_state);
     $this->assertNotNull($form->storage, 'FormStorage was created.');
-    $this->assertNotNull($form->registry, 'FormElementRegistry was created.');
+    $this->assertNotNull($form->elementRegistry, 'FormElementRegistry was created.');
     $this->assertNotNull($form->root, 'The root element was created.');
     /* Basic Adding properties - Array Access */
     $form['#attributes'] = array('enctype' => 'multipart/form-data');
@@ -73,13 +73,17 @@ class ObjectiveForms_Form_TestCase extends DrupalUnitTestCase {
       ),
       'first' => array(
         '#title' => 'first',
+        '#hash' => $form->first->hash,
         'second' => array(
-          '#title' => 'second'
+          '#title' => 'second',
+          '#hash' => $form->first->second->hash
         )
       ),
       'third' => array(
         '#title' => 'third',
-      )
+        '#hash' => $form->third->hash,
+      ),
+      '#hash' => $form->root->hash
     );
     $this->assertEqual($output, $expected_output, 'Form::toArray()\'s output matched its expected value.');
   }
@@ -105,10 +109,10 @@ class ObjectiveForms_Form_TestCase extends DrupalUnitTestCase {
     $form->first->second = new FormElement(array('#title' => 'second'));
     $form->third = new FormElement(array('#title' => 'third'));
     $clone = $form->duplicate($form->first->second->hash);
-    $this->assertTrue($form->registry->isClone($clone->hash), 'Cloned Form element.');
-    $this->assertIdentical($form->first->second, $form->registry->getAncestor($clone->hash, 0), 'Ancestory is correct for clone at depth one.');
+    $this->assertTrue($form->elementRegistry->isClone($clone->hash), 'Cloned Form element.');
+    $this->assertIdentical($form->first->second, $form->elementRegistry->getAncestor($clone->hash, 0), 'Ancestory is correct for clone at depth one.');
     $new_clone = $form->duplicateOriginal($clone->hash);
-    $this->assertIdentical($form->first->second, $form->registry->getAncestor($new_clone->hash, 0), 'Ancestory is correct for clone from original.');
+    $this->assertIdentical($form->first->second, $form->elementRegistry->getAncestor($new_clone->hash, 0), 'Ancestory is correct for clone from original.');
   }
 
 }

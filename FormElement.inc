@@ -65,7 +65,7 @@ class FormElement implements ArrayAccess {
     $original_hash = $this->hash;
     $this->protected = clone $this->protected;
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
-    
+
     $this->hash = spl_object_hash($this); // Maintain uniqueness.
     foreach ($this->controls as $key => $control) { // Clone Controls.
       if (is_array($control)) {
@@ -375,11 +375,35 @@ class FormElement implements ArrayAccess {
    * @return array
    */
   public function toArray() {
-    $output = $this->controls;
+    $output = array('#hash' => $this->hash);
+    $this->addControlsToArray($output);
+    $this->addChildrenToArray($output);
+    return $output;
+  }
+
+  /**
+   *
+   * @param array $output 
+   */
+  private function addControlsToArray(array &$output) {
+    foreach ($this->controls as $name => $control) {
+      if (has_interface($control, 'FormPropertyInterface')) {
+        $output[$name] = $control->toDrupalForm();
+      }
+      else {
+        $output[$name] = $control;
+      }
+    }
+  }
+
+  /**
+   *
+   * @param array $output 
+   */
+  private function addChildrenToArray(array &$output) {
     foreach ($this->children as $name => $child) {
       $output[$name] = $child->toArray();
     }
-    return $output;
   }
 
 }
