@@ -66,7 +66,6 @@ class ObjectiveForms_Form_TestCase extends DrupalUnitTestCase {
     $form->first = new FormElement(array('#title' => 'first'));
     $form->first->second = new FormElement(array('#title' => 'second'));
     $form->third = new FormElement(array('#title' => 'third'));
-    $this->pass('Before to array');
     $output = $form->toArray();
     $expected_output = array(
       '#attributes' => array(
@@ -83,6 +82,33 @@ class ObjectiveForms_Form_TestCase extends DrupalUnitTestCase {
       )
     );
     $this->assertEqual($output, $expected_output, 'Form::toArray()\'s output matched its expected value.');
+  }
+
+  /**
+   * 
+   */
+  public function testFind() {
+    $form_state = array();
+    $form = new Form($form_state);
+    $form->first = new FormElement(array('#title' => 'first'));
+    $form->first->second = new FormElement(array('#title' => 'second'));
+    $form->third = new FormElement(array('#title' => 'third'));
+    $hash = $form->first->second->hash;
+    $element = $form->findElement($hash);
+    $this->assertIdentical($element, $form->first->second, 'findElement found the correct element.');
+  }
+
+  public function testCloning() {
+    $form_state = array();
+    $form = new Form($form_state);
+    $form->first = new FormElement(array('#title' => 'first'));
+    $form->first->second = new FormElement(array('#title' => 'second'));
+    $form->third = new FormElement(array('#title' => 'third'));
+    $clone = $form->duplicate($form->first->second->hash);
+    $this->assertTrue($form->registry->isClone($clone->hash), 'Cloned Form element.');
+    $this->assertIdentical($form->first->second, $form->registry->getAncestor($clone->hash, 0), 'Ancestory is correct for clone at depth one.');
+    $new_clone = $form->duplicateOriginal($clone->hash);
+    $this->assertIdentical($form->first->second, $form->registry->getAncestor($new_clone->hash, 0), 'Ancestory is correct for clone from original.');
   }
 
 }

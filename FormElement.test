@@ -72,9 +72,10 @@ class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
     $this->assertEqual($form_element['#title'], 'test title', 'Control set via array interface and got via array interface.');
     $this->assertEqual($form_element->title, 'test title', 'Control set via array interface and got via __get.');
     /* Basic - Copying (Expected to do deep copies) */
-    
+    $form_element->child_1 = $child_1; // Adopt
     $clone = clone $child_1;
     $this->assertNotEqual($child_1->hash, $clone->hash, 'Cloned Form Element has different hash.');
+    $this->assertNotNULL($child_1->parent, 'Original element still has a parent.');
     $this->assertNull($clone->parent, 'Cloned element, has no parent.');
   }
 

@@ -38,6 +38,13 @@ class Form implements ArrayAccess {
   public $root;
 
   /**
+   * 
+   */
+  public static function createFromDrupalForm(array &$drupal_form, array &$form_state) {
+    $form = new Form(&$form_state);
+  }
+
+  /**
    * Creates a Form.
    * 
    * @param array $form
@@ -58,6 +65,53 @@ class Form implements ArrayAccess {
    */
   protected function createRoot() {
     return new FormElement();
+  }
+
+  /**
+   * Seaches the form for the given form element.
+   * 
+   * @param hash $hash 
+   * @return FormElement
+   */
+  public function findElement($hash) {
+    return $this->root->findElement($hash);
+  }
+
+  /**
+   * 
+   * @param hash $hash
+   * @return boolean
+   */
+  public function hasElement($hash) {
+    return $this->findElement($hash) != NULL;
+  }
+
+  /**
+   * Duplicates an element
+   * 
+   * @param hash $hash 
+   * @return FormElement
+   */
+  public function duplicate($hash) {
+    $element = $this->registry->get($hash);
+    if ($element) {
+      return clone $element;
+    }
+    return NULL;
+  }
+
+  /**
+   * Duplicates an element from its original definition.
+   * 
+   * @param hash $hash
+   * @return FormElement
+   */
+  public function duplicateOriginal($hash) {
+    $original = $this->registry->getOriginal($hash);
+    if ($original) {
+      return clone $original;
+    }
+    return NULL;
   }
 
   /**

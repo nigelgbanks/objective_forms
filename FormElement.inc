@@ -44,16 +44,17 @@ class FormElement implements ArrayAccess {
   public function __construct(array $controls = NULL) {
     $this->controls = isset($controls) ? $controls : array();
     $this->children = array();
-    $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => spl_object_hash($this)));
+    $hash = isset($this->controls['#hash']) ? $this->controls['#hash'] : spl_object_hash($this);
+    $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => $hash));
     module_invoke_all('form_element_created', $this); // Some modules will want to register all created FormElements.
   }
 
   /**
    * Called when this object is destroyed.
    *
-  public function __destruct() {
+    public function __destruct() {
     module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to be notified of any destroyed FormElements.
-  }*/
+    } */
 
   /**
    * Clone this FormElement. 
@@ -63,8 +64,9 @@ class FormElement implements ArrayAccess {
   public function __clone() {
     $original_hash = $this->hash;
     $this->protected = clone $this->protected;
-    $this->hash = spl_object_hash($this); // Maintain uniqueness.
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
+    
+    $this->hash = spl_object_hash($this); // Maintain uniqueness.
     foreach ($this->controls as $key => $control) { // Clone Controls.
       if (is_array($control)) {
         $this->controls[$key] = array_copy_recursive($control);
@@ -77,6 +79,24 @@ class FormElement implements ArrayAccess {
       $this->children[$key] = clone $child;
     }
     module_invoke_all('form_element_cloned', $original_hash, $this); // Some modules will want to register all cloned FormElements.
+  }
+
+  /**
+   *
+   * @param hash $hash 
+   * @return FormElement
+   */
+  public function findElement($hash) {
+    if ($this->hash == $hash) {
+      return $this;
+    }
+    foreach ($this->children as $child) {
+      $element = $child->findElement($hash);
+      if ($element) {
+        return $element;
+      }
+    }
+    return NULL;
   }
 
   /**
