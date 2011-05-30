@@ -29,7 +29,7 @@ class Form implements ArrayAccess {
    *
    * @var FormElementRegistry
    */
-  public $registry;
+  public $elementRegistry;
   /**
    * The FormElements that make up the form.
    * 
@@ -55,7 +55,7 @@ class Form implements ArrayAccess {
     module_load_include('inc', 'objective_forms', 'FormElementRegistry');
     $this->form_state = &$form;
     $this->storage = FormStorage::initialize($form_state);
-    $this->registry = FormElementRegistry::getInstance();
+    $this->elementRegistry = FormElementRegistry::getInstance();
     $this->root = $this->createRoot();
   }
 
@@ -93,7 +93,7 @@ class Form implements ArrayAccess {
    * @return FormElement
    */
   public function duplicate($hash) {
-    $element = $this->registry->get($hash);
+    $element = $this->elementRegistry->get($hash);
     if ($element) {
       return clone $element;
     }
@@ -107,7 +107,7 @@ class Form implements ArrayAccess {
    * @return FormElement
    */
   public function duplicateOriginal($hash) {
-    $original = $this->registry->getOriginal($hash);
+    $original = $this->elementRegistry->getOriginal($hash);
     if ($original) {
       return clone $original;
     }
