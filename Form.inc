@@ -115,6 +115,26 @@ class Form implements ArrayAccess {
   }
 
   /**
+   * Validates the form.
+   * 
+   * @param array $form
+   * @param array $form_state 
+   */
+  public function validate(array &$form, array &$form_state) {
+    // Implemented in child classes.
+  }
+
+  /**
+   * Submits the form.
+   * 
+   * @param array $form
+   * @param array $form_state 
+   */
+  public function submit(array &$form, array &$form_state) {
+    // Implemented in child classes.
+  }
+
+  /**
    * Outputs the form as an array, which can be used by the Drupal Form API.
    * 
    * @return array
