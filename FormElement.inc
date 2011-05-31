@@ -41,11 +41,11 @@ class FormElement implements ArrayAccess {
    * @param array $children
    */
   public function __construct(array $form = NULL) {
+    $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => NULL));
     $this->controls = array();
     $this->children = array();
     $this->initialize($form);
-    $hash = isset($this->controls['#hash']) ? $this->controls['#hash'] : spl_object_hash($this);
-    $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => $hash));
+    $this->hash = isset($this->controls['#hash']) ? $this->controls['#hash'] : spl_object_hash($this);
     module_invoke_all('form_element_created', $this); // Some modules will want to register all created FormElements.
   }
 
@@ -82,7 +82,8 @@ class FormElement implements ArrayAccess {
   protected function initializeChildren(array &$form) {
     $children = element_children($form);
     foreach ($children as $key) {
-      $this->children[$key] = new FormElement($form[$key]);
+      $child = new FormElement($form[$key]);
+      $this->adopt($key, $child);
     }
   }
 
@@ -173,13 +174,6 @@ class FormElement implements ArrayAccess {
         return;
       }
     }
-  }
-
-  /**
-   * 
-   */
-  public function __toString() {
-    // Implement for debug purposes.
   }
 
   /**

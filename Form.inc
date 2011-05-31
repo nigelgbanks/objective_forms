@@ -219,4 +219,8 @@ class Form implements ArrayAccess {
     $this->root->offsetUnset($offset);
   }
 
+  public function __toString() {
+    return (string) $this->root;
+  }
+
 }

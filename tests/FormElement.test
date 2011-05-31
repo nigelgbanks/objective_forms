@@ -82,8 +82,21 @@ class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
   /**
    * Test creating drupal forms.
    */
-  function testToDrupalForm() {
-    
+  function testCreateFromDrupalForm() {
+    $form = array(
+      '#attributes' => array('class' => 'foobar'),
+      'first' => array(
+        '#title' => 'first',
+        'second' => array(
+          '#title' => 'second',
+        )
+      ),
+    );
+    $form_element = new FormElement($form);
+    $this->assertNotNull($form_element, 'Created FormElement from drupal definition.');
+    $this->assertNotNull($form_element->first, 'Created FormElement child.');
+    $this->assertNotNull($form_element->first->second, 'Created FormElement grand child.');
+    $this->assertIdentical($form_element->first->parent, $form_element, 'Set Parent correctly.');
   }
 
 }
