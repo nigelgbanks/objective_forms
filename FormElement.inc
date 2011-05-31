@@ -9,7 +9,6 @@
 module_load_include('inc', 'php_lib', 'ReflectionHelpers');
 module_load_include('inc', 'php_lib', 'ReadOnlyProtectedMembers');
 module_load_include('inc', 'objective_forms', 'Utils');
-//module_load_include('inc', 'objective_forms', 'FormControl');
 
 /**
  * Form Element Class.
@@ -25,13 +24,13 @@ class FormElement implements ArrayAccess {
   /**
    * Child Form Elements
    * 
-   * @var FormElement[]
+   * @var array
    */
   public $children;
   /**
    * Child Form Controls.
    * 
-   * @var FormControl[]
+   * @var array
    */
   public $controls;
 
@@ -41,20 +40,51 @@ class FormElement implements ArrayAccess {
    * @param array $controls
    * @param array $children
    */
-  public function __construct(array $controls = NULL) {
-    $this->controls = isset($controls) ? $controls : array();
+  public function __construct(array $form = NULL) {
+    $this->controls = array();
     $this->children = array();
+    $this->initialize($form);
     $hash = isset($this->controls['#hash']) ? $this->controls['#hash'] : spl_object_hash($this);
     $this->protected = new ReadOnlyProtectedMembers(array('parent' => NULL, 'hash' => $hash));
     module_invoke_all('form_element_created', $this); // Some modules will want to register all created FormElements.
   }
 
   /**
-   * Called when this object is destroyed.
-   *
-    public function __destruct() {
-    module_invoke_all('form_element_destroyed', $this->hash); // Some modules will want to be notified of any destroyed FormElements.
-    } */
+   * Initialize this object from a drupal form definition.
+   * 
+   * @param array $form 
+   */
+  protected function initialize(array &$form = NULL) {
+    if (isset($form)) {
+      $this->initializeControls($form);
+      $this->initializeChildren($form);
+    }
+  }
+
+  /**
+   * Create controls from drupal form definition.
+   * 
+   * @param array $form
+   */
+  protected function initializeControls(array &$form) {
+    module_load_include('inc', 'objective_forms', 'FormProperty');
+    $properties = element_properties($form);
+    foreach ($properties as $key) {
+      $this->controls[$key] = FormProperty::Expand($key, $form[$key]);
+    }
+  }
+
+  /**
+   * Create children from drupal form definition.
+   * 
+   * @param array $form 
+   */
+  protected function initializeChildren(array &$form) {
+    $children = element_children($form);
+    foreach ($children as $key) {
+      $this->children[$key] = new FormElement($form[$key]);
+    }
+  }
 
   /**
    * Clone this FormElement. 
@@ -65,7 +95,6 @@ class FormElement implements ArrayAccess {
     $original_hash = $this->hash;
     $this->protected = clone $this->protected;
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
-
     $this->hash = spl_object_hash($this); // Maintain uniqueness.
     foreach ($this->controls as $key => $control) { // Clone Controls.
       if (is_array($control)) {
@@ -388,7 +417,7 @@ class FormElement implements ArrayAccess {
   private function addControlsToArray(array &$output) {
     foreach ($this->controls as $name => $control) {
       if (has_interface($control, 'FormPropertyInterface')) {
-        $output[$name] = $control->toDrupalForm();
+        $output[$name] = $control->getValue();
       }
       else {
         $output[$name] = $control;

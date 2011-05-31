@@ -59,8 +59,10 @@ function objective_forms_menu() {
 function objective_form(&$form_state) {
   module_load_include('inc', 'objective_forms', 'Form');
   module_load_include('inc', 'objective_forms', 'FormElement');
-  $_form = array();
-  $form = new Form($_form, $form_state);
+  $form = array(
+    ''
+  );
+  $form = new Form($form_state, $form);
   $form->one = new FormElement();
   $form->one->two = new FormElement();
   $form['one']->type = 'textfield';

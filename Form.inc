@@ -38,33 +38,26 @@ class Form implements ArrayAccess {
   public $root;
 
   /**
-   * 
-   */
-  public static function createFromDrupalForm(array &$drupal_form, array &$form_state) {
-    $form = new Form(&$form_state);
-  }
-
-  /**
    * Creates a Form.
    * 
    * @param array $form
    * @param array $form_state 
    */
-  public function __construct(array &$form_state) {
+  public function __construct(array $form, array &$form_state) {
     module_load_include('inc', 'objective_forms', 'FormStorage');
     module_load_include('inc', 'objective_forms', 'FormElementRegistry');
-    $this->form_state = &$form;
+    $this->form_state = &$form_state;
     $this->storage = FormStorage::initialize($form_state);
     $this->elementRegistry = FormElementRegistry::getInstance();
-    $this->root = $this->createRoot();
+    $this->root = $this->createRoot($form);
   }
 
   /**
    *
    * @return FormElement 
    */
-  protected function createRoot() {
-    return new FormElement();
+  protected function createRoot(array &$form = NULL) {
+    return new FormElement($form);
   }
 
   /**
@@ -112,6 +105,20 @@ class Form implements ArrayAccess {
       return clone $original;
     }
     return NULL;
+  }
+
+  /**
+   * Remove the form element from this form.
+   * 
+   * @param hash $hash
+   * @return FormElement 
+   */
+  public function remove($hash) {
+    $element = $this->findElement($hash);
+    if (isset($element)) {
+      $element->orphan();
+    }
+    return $element;
   }
 
   /**
