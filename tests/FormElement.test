@@ -99,4 +99,48 @@ class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
     $this->assertIdentical($form_element->first->parent, $form_element, 'Set Parent correctly.');
   }
 
+  function testEachChild() {
+    $form = array(
+      '#attributes' => array('class' => 'foobar'),
+      'first' => array(
+        '#title' => 'first',
+      ),
+      'second' => array(
+        '#title' => 'second',
+      )
+    );
+    $form_element = new FormElement($form);
+    $form_element->eachChild(array($this, '_testEachChild'), '#test', 'test');
+    $this->assertEqual($form_element->first->test, 'test', 'Set a property on the first child via eachChild()');
+    $this->assertEqual($form_element->second->test, 'test', 'Set a property on the second child via eachChild()');
+  }
+
+  function testEachDecendant() {
+    $form = array(
+      '#attributes' => array('class' => 'foobar'),
+      'first' => array(
+        '#title' => 'first',
+        'second' => array(
+          '#title' => 'second',
+          'third' => array(
+            '#title' => 'third',
+          )
+        )
+      ),
+      'fourth' => array(
+        '#title' => 'fourth'
+      )
+    );
+    $form_element = new FormElement($form);
+    $form_element->eachDecendant(array($this, '_testEachChild'), '#test', 'test');
+    $this->assertEqual($form_element->first->test, 'test', 'Set a property on the first child via eachDecendant()');
+    $this->assertEqual($form_element->first->second->test, 'test', 'Set a property on the second child via eachDecendant()');
+    $this->assertEqual($form_element->first->second->third->test, 'test', 'Set a property on the third child via eachDecendant()');
+    $this->assertEqual($form_element->fourth->test, 'test', 'Set a property on the fourth child via eachDecendant()');
+  }
+
+  function _testEachChild(FormElement $child, $property_name, $property_value) {
+    $child[$property_name] = $property_value;
+  }
+
 }

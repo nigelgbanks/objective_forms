@@ -131,17 +131,35 @@ class FormElement implements ArrayAccess {
 
   /**
    * Takes a function applies it to each child.
+   * 
+   * @param type $client_func 
    */
-  public function eachChild($function) {
-    $args = func_get_args();
-    array_shift($args); // Remove function argument
+  public function eachChild($client_func) {
+    $original_args = func_get_args();
+    $client_func_args = $original_args;
+    array_shift($client_func_args); // Remove client function from the argument list
     foreach ($this->children as $child) {
-      array_unshift($child, $args);
-      if (call_user_func_array($function, $args) == FALSE) {
-        return;
+      if ($this->_eachChild($child, $client_func, $client_func_args) === FALSE) {
+        return FALSE;
       }
-      array_shift($args);
     }
+    return TRUE;
+  }
+
+  /**
+   *
+   * @param FormElement $child
+   * @param type $client_func
+   * @param array $client_func_args
+   * @return type 
+   */
+  private function _eachChild(FormElement $child, $client_func, array &$client_func_args) {
+    array_unshift($client_func_args, $child);
+    if (call_user_func_array($client_func, $client_func_args) === FALSE) {
+      return FALSE;
+    }
+    array_shift($client_func_args);
+    return TRUE;
   }
 
   /**
@@ -166,14 +184,19 @@ class FormElement implements ArrayAccess {
    * 
    * @return iterator
    */
-  public function eachDecendant($function) {
-    $args = func_get_args();
-    array_shift($args); // Remove function argument
+  public function eachDecendant($client_func) {
+    $original_args = func_get_args();
+    $client_func_args = $original_args;
+    array_shift($client_func_args); // Remove client function from argument list.
     foreach ($this->children as $child) {
-      if (call_user_func_array($function, $args) == FALSE) {
-        return;
+      if ($this->_eachChild($child, $client_func, $client_func_args) === FALSE) {
+        return FALSE; // End processing
+      }
+      if (call_user_func_array(array($child, 'eachDecendant'), $original_args) === FALSE) {
+        return FALSE; // End processing
       }
     }
+    return TRUE; // Continue processing
   }
 
   /**
