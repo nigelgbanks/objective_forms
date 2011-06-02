@@ -6,11 +6,55 @@
  * @file
  *
  */
-module_load_include('inc', 'php_lib', 'Reflection');
+module_load_include('inc', 'php_lib', 'Array');
+
+/**
+ *
+ * @param type $hash
+ * @param array $form 
+ */
+function &find_element(array &$form, $hash) {
+  if (has_hash($form, $hash)) {
+    return $form;
+  }
+  return find_child_element($form, $hash);
+}
+
+/**
+ *
+ * @param array $form
+ * @param type $hash
+ * @return array 
+ */
+function &find_child_element(array &$form, $hash) {
+  $found = NULL;
+  $children = element_children($form);
+  foreach ($children as $child) {
+    $child = &$form[$child];
+    $found = has_hash($child, $hash) ? $child : find_child_element($child, $hash);
+    if (isset($found)) {
+      return $found;
+    }
+  }
+  return $found;
+}
+
+/**
+ *
+ * @param array $element
+ * @param type $hash
+ * @return type 
+ */
+function has_hash(array &$element, $hash) {
+  if (isset($element['#hash']) && $element['#hash'] == $hash) {
+    return TRUE;
+  }
+  return FALSE;
+}
 
 /**
  * Helper methods.
- */
+ *
 class ObjectiveFormsUtils {
 
   /**
@@ -20,7 +64,7 @@ class ObjectiveFormsUtils {
    * @param mixed $value 
    * @return mixed
    *   Either a FormElement or a FormControl.
-   */
+   *
   public static function convertToObjective($name, $value, array $params) {
     if (self::isObjective($name, $value)) {
       return $value;
@@ -41,7 +85,7 @@ class ObjectiveFormsUtils {
    * @param mixed $name
    * @param mixed $value 
    * @return boolean
-   */
+   *
   private static function isObjective($name, $value) {
     return is_or_descends_from($value, 'FormElement') || is_or_descends_from($value, 'FormControl');
   }
@@ -51,7 +95,7 @@ class ObjectiveFormsUtils {
    * @param type $name
    * @param type $value
    * @return type 
-   */
+   *
   private static function isDrupalFormElement($name, $value) {
     return element_child($name) && is_array($value) && !self::isDrupalFormControl($name, $value);
   }
@@ -63,7 +107,7 @@ class ObjectiveFormsUtils {
    * @param type $name
    * @param type $value
    * @return type 
-   */
+   *
   private static function isDrupalFormControl($name, $value) {
     return element_property($name) || !is_array($value) || (is_array($value) && count(element_properties($value)) == 0); // Maybe name may not include the hash... 
   }
@@ -72,7 +116,7 @@ class ObjectiveFormsUtils {
    *
    * @param array $element
    * @return FormElement 
-   */
+   *
   public static function convertDrupalFormElementToObjective(array &$element) {
     $children = array();
     $controls = array();
@@ -94,9 +138,9 @@ class ObjectiveFormsUtils {
    * @param type $name
    * @param type $value
    * @return FormControl 
-   */
+   *
   public static function convertDrupalFormControlToObjective($name, $value) {
     return new FormControl($name, $value);
   }
 
-}
+}*/
