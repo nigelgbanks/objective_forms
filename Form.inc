@@ -8,6 +8,9 @@
  * Defines a class that allows drupal forms to build via objects. Note that is still possible to build non functioning drupal forms using this
  * class, the same rules apply to FormControls and FormElements that would normally apply to a Drupal API Form.
  */
+module_load_include('inc', 'objective_forms', 'FormElement');
+module_load_include('inc', 'objective_forms', 'FormStorage');
+module_load_include('inc', 'objective_forms', 'FormElementRegistry');
 
 /**
  * An collection object that comprises all the FormElements in a form.
@@ -44,8 +47,6 @@ class Form implements ArrayAccess {
    * @param array $form_state 
    */
   public function __construct(array $form, array &$form_state) {
-    module_load_include('inc', 'objective_forms', 'FormStorage');
-    module_load_include('inc', 'objective_forms', 'FormElementRegistry');
     $this->form_state = &$form_state;
     $this->storage = FormStorage::initialize($form_state);
     $this->elementRegistry = FormElementRegistry::getInstance();

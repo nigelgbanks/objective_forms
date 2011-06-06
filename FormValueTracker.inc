@@ -70,10 +70,14 @@ class FormValueTracker {
       $this->track = false;
       $this->reset();
     }
-    if ($this->track && isset($this->current[$element->key])) {
-      $this->current = &$this->current[$element->key];
+    $index = $element->getIndex();
+    if ($this->track && isset($this->current[$index])) {
+      $this->current = &$this->current[$index];
+      return $this->current;
     }
-    return $this->current;
+    else {
+      return isset($this->current[$index]) ? $this->current[$index] : NULL;
+    }
   }
 
   /**

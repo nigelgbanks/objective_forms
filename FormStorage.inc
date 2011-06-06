@@ -67,7 +67,7 @@ class FormStorage {
    */
   private function __construct(array &$form_state) {
     $this->initializeFormState($form_state);
-    $this->storage = &$form_state['storage'];
+    $this->storage = &$form_state['storage'][self::STORAGE_ROOT];
   }
 
   /**

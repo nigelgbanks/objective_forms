@@ -43,10 +43,10 @@ class FormValues {
    * 
    * @param array $form_state
    *   Drupal Form state.
-   * @param FormElements $root 
+   * @param FormElement $root 
    *   The elements to associate with submitted values.
    */
-  public function __construct(array &$form_state, FormElement $element) {
+  public function __construct(array &$form_state, FormElement $root) {
     $this->values = array();
     if (self::Exists($form_state)) {
       $this->tracker = new FormValueTracker($form_state['values']);
@@ -63,7 +63,7 @@ class FormValues {
    */
   private function setValues(FormElement $element, FormValueTracker $tracker) {
     $this->setValue($element, $tracker);
-    foreach ($element as $child) {
+    foreach ($element->children as $child) {
       $this->setValues($child, clone $tracker);
     }
   }

@@ -7,6 +7,7 @@
  *
  */
 module_load_include('inc', 'objective_forms', 'FormElement');
+module_load_include('inc', 'objective_forms', 'FormStorage');
 
 /**
  * Class that holds a flat array of all FormElements.
@@ -33,6 +34,29 @@ class FormElementRegistry {
   private $cloned;
 
   /**
+   * Checks if the FormElementRegistry
+   *
+   * @return boolean
+   */
+  public static function isInitialized() {
+    return isset(self::$instance);
+  }
+
+  /**
+   * Initialize the FormElementRegistry singleton.
+   */
+  private static function initialize() {
+    if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests. But should during normal use.
+      $storage = FormStorage::getInstance();
+      self::$instance = isset($storage->elementRegistry) ? $storage->elementRegistry : new FormElementRegistry();
+      $storage->elementRegistry = self::$instance;
+    }
+    else {
+      self::$instance = new FormElementRegistry(); // Create
+    }
+  }
+
+  /**
    * Creates a singleton reference to the registry.
    * 
    * Stores a new FormElementRegistry in the form storage.
@@ -41,13 +65,8 @@ class FormElementRegistry {
    * @return Registry 
    */
   public static function getInstance() {
-    if (empty(self::$instance)) {
-      self::$instance = new FormElementRegistry(); // Create
-      module_load_include('inc', 'objective_forms', 'FormStorage');
-      if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests. But should during normal use.
-        $storage = FormStorage::getInstance();
-        $storage->elementRegistry = self::$instance; // Store
-      }
+    if (!self::isInitialized()) {
+      self::initialize();
     }
     return self::$instance;
   }

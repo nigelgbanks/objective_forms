@@ -34,11 +34,14 @@ class FormPopulator {
    * @param array $form
    */
   public function populate(array &$form) {
-    foreach ($form as $element) {
-      $value = $this->getDefaultValue($element);
+    $children = element_children($form);
+    foreach ($children as $child) {
+      $child = &$form[$child];
+      $value = $this->getDefaultValue($child);
       if (isset($value)) {
-        $this->setDefaultValue($element, $value);
+        $this->setDefaultValue($child, $value);
       }
+      $this->populate($child); // Recurse
     }
     return $form;
   }
