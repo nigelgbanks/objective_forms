@@ -6,6 +6,8 @@
  * @file
  *
  */
+module_load_include('inc', 'objective_forms', 'FormElement');
+module_load_include('inc', 'objective_forms', 'FormElementRegistry');
 
 /**
  * This class utilizes scope and a reference pointer to track where 
@@ -66,6 +68,12 @@ class FormValueTracker {
     if (isset($element['#array_parents'])) {
       $parents = $element['#array_parents'];
       return array_pop($parents);
+    }
+    else if (isset($element['#hash'])) {
+      $found = FormElementRegistry::getInstance()->get($element['#hash']);
+      if($found) {
+        return $found->getIndex();
+      }
     }
     return NULL;
   }
