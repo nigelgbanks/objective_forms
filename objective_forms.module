@@ -45,39 +45,53 @@ function objective_forms_form_element_destroyed($hash) {
  * Uses submitted post data to set the default values for the form.
  */
 function objective_forms_set_default_values(array &$form, array &$form_state) {
-  module_load_include('inc', 'objective_forms', 'FormPopulator');
-  $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
-  $populator->populate($form);
+//  module_load_include('inc', 'objective_forms', 'FormPopulator');
+//  $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
+//  $populator->populate($form);
   return $form;
 }
 
 /**
- * !TEST CODE REMOVE! 
+ * !TEST CODE -- Needed for some Simple Tests! 
  */
 function objective_forms_menu() {
-  $items['objective'] = array(
-    'title' => 'menu_item_title',
+  $items['objective/forms/test/%'] = array(
+    'title' => 'Test Form Used By SimpleTest',
     'description' => 'menu_item_description',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('objective_form'),
-    'access arguments' => array('menu_item_access'),
+    'page callback' => 'objective_forms_test',
+    'page arguments' => array(3),
+    'access arguments' => array('access content'),
     'type' => MENU_NORMAL_ITEM,
   );
   return $items;
 }
 
-function objective_form(&$form_state) {
-  module_load_include('inc', 'objective_forms', 'Form');
-  module_load_include('inc', 'objective_forms', 'FormElement');
-  $form = array(
-    ''
-  );
-  $form = new Form($form_state, $form);
-  $form->one = new FormElement();
-  $form->one->two = new FormElement();
-  $form['one']->type = 'textfield';
-  $out = $form->toArray();
-  return $out;
+/**
+ * Load a test form.
+ * 
+ * @param string $form_name
+ * @return html
+ */
+function objective_forms_test($form_name) {
+  objective_forms_test_load_files();// Load all test files
+  return drupal_get_form($form_name);
+}
+
+/**
+ * Include all the test files so we can find the proper function for getting the file.
+ */
+function objective_forms_test_load_files() {
+  module_load_include('php', 'simpletest', 'drupal_web_test_case');
+  $include_path = drupal_get_path('module', 'objective_forms') . "/tests";
+  $dir = opendir($include_path);
+  if ($dir !== false) {
+    while (($file = readdir($dir)) !== false) {
+      if (preg_match('/\.test$/', $file)) {
+        require_once "$include_path/$file";
+      }
+    }
+    closedir($dir);
+  }
 }
 
 /**

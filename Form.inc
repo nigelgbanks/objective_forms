@@ -150,9 +150,11 @@ class Form implements ArrayAccess {
    */
   public function toArray() {
     $form = $this->root->toArray();
-    $after_build = isset($form['#after_build']) ? $form['#after_build'] : array();
-    array_push($after_build, 'objective_forms_set_default_values');
-    $form['#after_build'] = $after_build;
+    module_load_include('inc', 'objective_forms', 'FormPopulator');
+    if (isset($this->form_state['values'])) {
+      $populator = new FormPopulator(new FormValues($this->form_state, $form), $this->form_state);
+      $populator->populate($form);
+    }
     return $form;
   }
 

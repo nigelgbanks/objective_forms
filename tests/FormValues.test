@@ -6,8 +6,10 @@
  * @file
  *
  */
-class ObjectiveForms_FormValues_TestCase extends DrupalUnitTestCase {
+class ObjectiveForms_FormValues_TestCase extends DrupalWebTestCase {
 
+  protected $privileged_user;
+  
   /**
    * Get Test info.
    * 
@@ -29,101 +31,106 @@ class ObjectiveForms_FormValues_TestCase extends DrupalUnitTestCase {
     // Enable any modules required for the test.
     parent::setUp('objective_forms');
     module_load_include('inc', 'objective_forms', 'FormValues');
+    $this->privileged_user = $this->drupalCreateUser(array('access content'));
+    $this->drupalLogin($this->privileged_user);
+  }
+
+  public function prepForm($form_id, &$form, &$form_state) {
+    drupal_prepare_form($form_id, $form, $form_state);
+    drupal_process_form($form_id, $form, $form_state);
+  }
+  
+  public function tearDown() {
+    $this->drupalLogout($this->privileged_user);
+    parent::tearDown();
   }
 
   /**
    * Test constructing the Form definition.
    */
-  public function testNoTree() {
-    $form_state = array(
-      'values' => array(
-        'first' => '_first',
-        'second' => '_second',
-        'fourth' => '_fourth'
-      ),
+  public function test() {
+    
+    $form_path = 'objective/forms/test/objective_forms_test_form_values_form';
+    $this->drupalGet($form_path);
+    $edit = array(
+      'first' => 'test value'
     );
-    $drupal_form = array(
-      'first' => array(
-        '#title' => 'first',
-        '#hash' => 1,
-      ),
-      'second' => array(
-        '#title' => 'second',
-        '#hash' => 2,
-      ),
-      'third' => array(
-        '#title' => 'third',
-        '#hash' => 3,
-        'fourth' => array(
-          '#title' => 'forth',
-          '#hash' => 4,
-        )
-      ),
-    );
-    $form = new Form($drupal_form, $form_state);
-    $drupal_form = $form->toArray();
-    $values = new FormValues($form_state, $form->root);
-    $this->assertNotNull($values, "Create FormValues.");
-    $value = $values->getValue(1);
-    $expected = '_first';
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(2);
-    $expected = '_second';
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(3);
-    $expected = NULL;
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(4);
-    $expected = '_fourth';
-    $this->assertEqual($value, $expected);
+    $this->drupalPost($form_path, $edit, 'Submit');
+    if (variable_get('test', NULL) == 'TESTING') {
+      $this->pass('It was called!');
+    }
+    else {
+      $this->pass('It failed!');
+    }
   }
 
   public function testTree() {
-    $form_state = array(
+    /* $form_state = array(
       'values' => array(
-        'first' => array(
-          'second' => '_second',
-          'third' => array(
-            'fourth' => '_fourth'
-          )
-        )
-      ),
-    );
-    $drupal_form = array(
       'first' => array(
-        '#tree' => TRUE,
-        '#title' => 'first',
-        '#hash' => 1,
-        'second' => array(
-          '#title' => 'second',
-          '#hash' => 2,
-        ),
-        'third' => array(
-          '#title' => 'third',
-          '#hash' => 3,
-          'fourth' => array(
-            '#title' => 'forth',
-            '#hash' => 4,
-          )
-        ),
+      'second' => '_second',
+      'third' => array(
+      'fourth' => '_fourth'
+      )
+      )
       ),
-    );
-    $form = new Form($drupal_form, $form_state);
-    $drupal_form = $form->toArray();
-    $values = new FormValues($form_state, $form->root);
-    $this->assertNotNull($values, "Create FormValues.");
-    $value = $values->getValue(1);
-    $expected = NULL;
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(2);
-    $expected = '_second';
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(3);
-    $expected = NULL;
-    $this->assertEqual($value, $expected);
-    $value = $values->getValue(4);
-    $expected = '_fourth';
-    $this->assertEqual($value, $expected);
+      );
+      $form = array(
+      'first' => array(
+      '#tree' => TRUE,
+      '#title' => 'first',
+      '#hash' => 1,
+      'second' => array(
+      '#title' => 'second',
+      '#hash' => 2,
+      ),
+      'third' => array(
+      '#title' => 'third',
+      '#hash' => 3,
+      'fourth' => array(
+      '#title' => 'forth',
+      '#hash' => 4,
+      )
+      ),
+      ),
+      );
+      $values = new FormValues($form_state, $form);
+      $this->assertNotNull($values, "Create FormValues.");
+      $value = $values->getValue(1);
+      $expected = NULL;
+      $this->assertEqual($value, $expected);
+      $value = $values->getValue(2);
+      $expected = '_second';
+      $this->assertEqual($value, $expected);
+      $value = $values->getValue(3);
+      $expected = NULL;
+      $this->assertEqual($value, $expected);
+      $value = $values->getValue(4);
+      $expected = '_fourth';
+      $this->assertEqual($value, $expected); */
   }
 
+}
+
+/**
+ * Test form.
+ */
+function objective_forms_test_form_values_form(array &$form_state) {
+  module_load_include('inc', 'objective_forms', 'Form');
+  $drupal_form = array(
+    'first' => array(
+      '#type' => 'textfield',
+      '#title' => 'first',
+    ),
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => 'Submit'
+    )
+  );
+  $form = new Form($drupal_form, $form_state);
+  return $form->toArray();
+}
+
+function objective_forms_test_form_values_form_submit(array $form, array &$form_state) {
+  variable_set('test', 'TESTING');
 }
