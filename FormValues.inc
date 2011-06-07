@@ -5,18 +5,18 @@
 /**
  * @file
  *
- * Associates submitted form values with FormElements.
+ * Associates submitted form values with array &s.
  */
 module_load_include('inc', 'objective_forms', 'FormValueTracker');
 
 /**
  * This class stores all submitted values. It provides a mechanism for 
- * accessing submitted values via a FormElement object.
+ * accessing submitted values.
  */
 class FormValues {
 
   /**
-   * A map of submitted form values where the key is the FormElements hash.
+   * A map of submitted form values where the key is the FormElement's hash.
    * 
    * @var array
    */
@@ -43,10 +43,10 @@ class FormValues {
    * 
    * @param array $form_state
    *   Drupal Form state.
-   * @param FormElement $root 
+   * @param array $root 
    *   The elements to associate with submitted values.
    */
-  public function __construct(array &$form_state, FormElement $root) {
+  public function __construct(array &$form_state, array &$root) {
     $this->values = array();
     if (self::Exists($form_state)) {
       $this->tracker = new FormValueTracker($form_state['values']);
@@ -57,26 +57,30 @@ class FormValues {
   /**
    * Store values.
    * 
-   * @param FormElement $element
+   * @param array $element
    *   Element to store value for,
    * @param FormValueTracker $tracker 
    */
-  private function setValues(FormElement $element, FormValueTracker $tracker) {
+  private function setValues(array &$element, FormValueTracker $tracker) {
     $this->setValue($element, $tracker);
-    foreach ($element->children as $child) {
+    $children = element_children($element);
+    foreach ($children as $key) {
+      $child = &$element[$key];
       $this->setValues($child, clone $tracker);
     }
   }
 
   /**
-   * Associate the given FormElement, with a submitted value.
+   * Associate the given array &, with a submitted value.
    * 
-   * @param FormElement $element
+   * @param array $element
    * @param FormValueTracker $tracker 
    */
-  private function setValue(FormElement $element, FormValueTracker $tracker) {
+  private function setValue(array &$element, FormValueTracker $tracker) {
     $value = $tracker->getValue($element);
-    $this->values[$element->hash] = $value;
+    if (isset($element['#hash'])) {
+      $this->values[$element['#hash']] = $value;
+    }
   }
 
   /**
@@ -90,11 +94,11 @@ class FormValues {
   }
 
   /**
-   * Get the value associated with the given FormElement.
+   * Get the value associated with the given array &.
    * 
    * @param hash $hash
    * @return mixed
-   *   The submitted value for the given FormElement if found otherwise NULL.
+   *   The submitted value for the given array & if found otherwise NULL.
    */
   public function getValue($hash) {
     if ($this->hasValue($hash)) {

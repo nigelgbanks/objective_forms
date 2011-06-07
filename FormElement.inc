@@ -132,14 +132,14 @@ class FormElement implements ArrayAccess {
   /**
    * Takes a function applies it to each child.
    * 
-   * @param type $client_func 
+   * @param type $user_func 
    */
-  public function eachChild($client_func) {
+  public function eachChild($user_func) {
     $original_args = func_get_args();
-    $client_func_args = $original_args;
-    array_shift($client_func_args); // Remove client function from the argument list
+    $user_func_args = $original_args;
+    array_shift($user_func_args); // Remove user function from the argument list
     foreach ($this->children as $child) {
-      if ($this->_eachChild($child, $client_func, $client_func_args) === FALSE) {
+      if ($this->callUserFunction($user_func, $child, $user_func_args) === FALSE) {
         return FALSE;
       }
     }
@@ -147,49 +147,46 @@ class FormElement implements ArrayAccess {
   }
 
   /**
-   *
-   * @param FormElement $child
-   * @param type $client_func
-   * @param array $client_func_args
-   * @return type 
+   * Call a user function.
+   * 
+   * @param string $user_func
+   * @param mixed $first_argument
+   * @param array $user_func_args
+   * 
+   * @return boolean
    */
-  private function _eachChild(FormElement $child, $client_func, array &$client_func_args) {
-    array_unshift($client_func_args, $child);
-    if (call_user_func_array($client_func, $client_func_args) === FALSE) {
-      return FALSE;
-    }
-    array_shift($client_func_args);
-    return TRUE;
+  private function callUserFunction($user_func, $first_argument, array &$user_func_args) {
+    array_unshift($user_func_args, $first_argument);
+    $ret = call_user_func_array($user_func, $user_func_args);
+    array_shift($user_func_args);
+    return $ret;
   }
 
   /**
    * Takes a function applies it to each control.
    */
-  public function eachControl($function) {
-    $args = func_get_args();
-    array_shift($args); // Remove function argument
-    foreach ($this->controls as $key => $control) {
-      array_unshift($control, $args);
-      array_unshift($key, $args);
-      if (call_user_func_array($function, $args) == FALSE) {
-        return;
+  public function eachControl($user_func) {
+    $user_func_args = func_get_args();
+    array_shift($user_func_args); // Remove user function from the argument list
+    foreach ($this->controls as $key => &$control) {
+      if ($this->callUserFunction($user_func, array($key, &$control), $user_func_args) === FALSE) {
+        return FALSE;
       }
-      array_shift($args); // $control
-      array_shift($args); // $key
     }
+    return TRUE;
   }
 
   /**
-   * Returns an iterator that iterates over this elements decendants. Children and children of children.
+   * 
    * 
    * @return iterator
    */
-  public function eachDecendant($client_func) {
+  public function eachDecendant($user_func) {
     $original_args = func_get_args();
-    $client_func_args = $original_args;
-    array_shift($client_func_args); // Remove client function from argument list.
+    $user_func_args = $original_args;
+    array_shift($user_func_args); // Remove user function from argument list.
     foreach ($this->children as $child) {
-      if ($this->_eachChild($child, $client_func, $client_func_args) === FALSE) {
+      if ($this->callUserFunction($user_func, $child, $user_func_args) === FALSE) {
         return FALSE; // End processing
       }
       if (call_user_func_array(array($child, 'eachDecendant'), $original_args) === FALSE) {
@@ -197,6 +194,19 @@ class FormElement implements ArrayAccess {
       }
     }
     return TRUE; // Continue processing
+  }
+
+  /**
+   * 
+   */
+  public function each($user_func) {
+    $original_args = func_get_args();
+    $user_func_args = $original_args;
+    array_shift($user_func_args); // Remove user function from argument list.
+    if ($this->callUserFunction($user_func, $this, $user_func_args) === TRUE) {
+      return call_user_func_array(array($this, 'eachDecendant'), $original_args);
+    }
+    return FALSE;
   }
 
   /**
@@ -336,7 +346,6 @@ class FormElement implements ArrayAccess {
    */
   private function setControl($offset, FormControl $control) {
     if (isset($offset)) {
-      var_dump($control);
       $this->controls[$offset] = $control;
     } // Controls are not indexed values EVAR!.
   }

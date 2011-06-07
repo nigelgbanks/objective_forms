@@ -11,6 +11,7 @@
 module_load_include('inc', 'objective_forms', 'FormElement');
 module_load_include('inc', 'objective_forms', 'FormStorage');
 module_load_include('inc', 'objective_forms', 'FormElementRegistry');
+module_load_include('inc', 'objective_forms', 'FormPopulator');
 
 /**
  * An collection object that comprises all the FormElements in a form.
@@ -148,7 +149,11 @@ class Form implements ArrayAccess {
    * @return array
    */
   public function toArray() {
-    return $this->root->toArray();
+    $form = $this->root->toArray();
+    $after_build = isset($form['#after_build']) ? $form['#after_build'] : array();
+    array_push($after_build, 'objective_forms_set_default_values');
+    $form['#after_build'] = $after_build;
+    return $form;
   }
 
   /**

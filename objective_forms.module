@@ -42,6 +42,16 @@ function objective_forms_form_element_destroyed($hash) {
 }
 
 /**
+ * Uses submitted post data to set the default values for the form.
+ */
+function objective_forms_set_default_values(array &$form, array &$form_state) {
+  module_load_include('inc', 'objective_forms', 'FormPopulator');
+  $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
+  $populator->populate($form);
+  return $form;
+}
+
+/**
  * !TEST CODE REMOVE! 
  */
 function objective_forms_menu() {
@@ -67,7 +77,6 @@ function objective_form(&$form_state) {
   $form->one->two = new FormElement();
   $form['one']->type = 'textfield';
   $out = $form->toArray();
-  var_dump($out);
   return $out;
 }
 

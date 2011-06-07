@@ -18,14 +18,16 @@ class FormPopulator {
    * @var FormValues
    */
   protected $values;
+  protected $form_state;
 
   /**
    * Create FormPopulater.
    * 
    * @param NodeRegistry $registry 
    */
-  public function __construct(FormValues $values) {
+  public function __construct(FormValues $values, array &$form_state) {
     $this->values = $values;
+    $this->form_state = &$form_state;
   }
 
   /**
@@ -35,8 +37,8 @@ class FormPopulator {
    */
   public function populate(array &$form) {
     $children = element_children($form);
-    foreach ($children as $child) {
-      $child = &$form[$child];
+    foreach ($children as $key) {
+      $child = &$form[$key];
       $value = $this->getDefaultValue($child);
       if (isset($value)) {
         $this->setDefaultValue($child, $value);
@@ -74,7 +76,10 @@ class FormPopulator {
    * @param FormElement $element 
    */
   private function setDefaultValue(array &$element, $value) {
+    //$element['#default_value'] = $value;å
+    form_set_value($element, $value, $this->form_state);
     $element['#default_value'] = $value;
+    $element['#value'] = $value;
   }
 
 }
