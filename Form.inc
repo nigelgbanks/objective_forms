@@ -150,8 +150,8 @@ class Form implements ArrayAccess {
    */
   public function toArray() {
     $form = $this->root->toArray();
-    module_load_include('inc', 'objective_forms', 'FormPopulator');
     if (isset($this->form_state['values'])) {
+      module_load_include('inc', 'objective_forms', 'FormPopulator');
       $populator = new FormPopulator(new FormValues($this->form_state, $form), $this->form_state);
       $populator->populate($form);
     }

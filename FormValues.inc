@@ -8,6 +8,7 @@
  * Associates submitted form values with array &s.
  */
 module_load_include('inc', 'objective_forms', 'FormValueTracker');
+module_load_include('inc', 'php_lib', 'DrupalFormHelpers');
 
 /**
  * This class stores all submitted values. It provides a mechanism for 
