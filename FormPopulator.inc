@@ -76,10 +76,7 @@ class FormPopulator {
    * @param FormElement $element 
    */
   private function setDefaultValue(array &$element, $value) {
-    //$element['#default_value'] = $value;å
-    //form_set_value($element, $value, $this->form_state);
     $element['#default_value'] = $value;
-    //$element['#value'] = $value;
   }
 
 }
