@@ -83,7 +83,7 @@ class FormElement implements ArrayAccess {
     $children = element_children($form);
     foreach ($children as $key) {
       $child = new FormElement($form[$key]);
-      $this->adopt($key, $child);
+      $this->adopt($child, $key);
     }
   }
 
@@ -97,6 +97,7 @@ class FormElement implements ArrayAccess {
     $this->protected = clone $this->protected;
     $this->parent = NULL; // The parent was unaware of this cloned bastard child of science...
     $this->hash = spl_object_hash($this); // Maintain uniqueness.
+    // Clone Controls
     foreach ($this->controls as $key => $control) { // Clone Controls.
       if (is_array($control)) {
         $this->controls[$key] = array_copy_recursive($control);
@@ -105,8 +106,11 @@ class FormElement implements ArrayAccess {
         $this->controls[$key] = clone $control;
       }
     }
-    foreach ($this->children as $key => $child) { // Clone Children.
-      $this->children[$key] = clone $child;
+    // Clone Children.
+    $children = $this->children;
+    $this->children = array();
+    foreach ($children as $key => $child) { // Clone Children.
+      $this->adopt(clone $child, $key);
     }
     module_invoke_all('form_element_cloned', $original_hash, $this); // Some modules will want to register all cloned FormElements.
   }
@@ -317,7 +321,7 @@ class FormElement implements ArrayAccess {
    */
   public function offsetSet($offset, $value) {
     if (is_or_descends_from($value, 'FormElement')) {
-      $this->adopt($offset, $value);
+      $this->adopt($value, $offset);
     }
     else if (element_property($offset)) {
       $this->controls[$offset] = $value;
@@ -339,32 +343,22 @@ class FormElement implements ArrayAccess {
   }
 
   /**
-   * Sets a control to this form element.
-   * 
-   * @param mixed $offset
-   * @param FormControl $control 
-   */
-  private function setControl($offset, FormControl $control) {
-    if (isset($offset)) {
-      $this->controls[$offset] = $control;
-    } // Controls are not indexed values EVAR!.
-  }
-
-  /**
    * Adopt the given child. Forcefully removing from its original home.
    * 
    * @param mixed $offse
    * @param FormElement $child
    */
-  private function adopt($offset = NULL, FormElement $child) {
+  public function adopt(FormElement $child, $key = NULL) {
     $child->setParent($this);
-    if (isset($offset)) {
-      $this->children[$offset] = $child;
+    if (isset($key)) {
+      if (isset($this->children[$key])) {
+        $this->children[$key]->orphan();
+      }
+      $this->children[$key] = $child;
     }
     else {
       $this->children[] = $child;
     }
-    $child->parent = $this;
   }
 
   /**
