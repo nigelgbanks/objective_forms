@@ -80,6 +80,62 @@ class ObjectiveForms_FormElement_TestCase extends DrupalUnitTestCase {
   }
 
   /**
+   * Test setting the properites of form elements.
+   */
+  public function testSetProperties() {
+    $form = array(
+      '#type' => 'textfield',
+      '#access' => true,
+      '#after_build' => array('fake_function'),
+      '#ahah' => array(
+        'path' => 'poll/js',
+        'wrapper' => 'poll-choices',
+        'method' => 'replace',
+        'effect' => 'fade'
+      ),
+      '#attributes' => array('class' => 'ui-form'),
+      '#autocomplete_path' => '/xml/forms',
+      '#collapsed' => true,
+      '#collapsible' => false,
+      '#cols' => 10,
+      '#default_value' => 'testing',
+      '#delta' => 10,
+      '#description' => 'fake description',
+      '#disabled' => false,
+      '#element_validate' => array('fake_function'),
+      '#field_prefix' => '<div>',
+      '#field_suffix' => '</div>',
+      '#maxlength' => 20,
+      '#multiple' => true,
+      '#options' => array('opt' => 'opt'),
+      '#post_render' => array('fake_function'),
+      '#prefix' => '<div>',
+      '#pre_render' => array('fake_function'),
+      '#process' => array('fake_function'),
+      '#required' => true,
+      '#resizable' => false,
+      '#return_value' => 30,
+      '#rows' => 10,
+      '#size' => 11,
+      '#suffix' => '</div>',
+      '#theme' => 'theme_function',
+      '#title' => 'Fake Title',
+      '#tree' => true,
+      '#weight' => 100
+    );
+    $form_element = new FormElement($form);
+    foreach ($form as $key => $value) {
+      $_key = trim($key, '#');
+      $this->assertEqual($form_element[$key], $value, "Accessed $key via Array");
+      $this->assertEqual($form_element->$_key, $value, "Accessed $key via Get");
+    }
+    $output = $form_element->toArray();
+    foreach($form as $key => $value) {
+      $this->assertEqual($output[$key], $value, "toArray() output matched for $key.");
+    }
+  }
+
+  /**
    * Test creating drupal forms.
    */
   function testCreateFromDrupalForm() {

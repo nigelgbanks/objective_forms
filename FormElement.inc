@@ -435,12 +435,12 @@ class FormElement implements ArrayAccess {
    * @param array $output 
    */
   private function addControlsToArray(array &$output) {
-    foreach ($this->controls as $name => $control) {
-      if (has_interface($control, 'FormPropertyInterface')) {
-        $output[$name] = $control->getValue();
+    foreach ($this->controls as $name => $value) {
+      if (has_interface($value, 'FormPropertyInterface')) {
+        $output[$name] = $value->getValue();
       }
       else {
-        $output[$name] = $control;
+        $output[$name] = $value;
       }
     }
   }
