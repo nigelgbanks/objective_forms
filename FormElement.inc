@@ -418,6 +418,16 @@ class FormElement implements ArrayAccess {
     }
     return NULL;
   }
+  
+  /**
+   * Gets the full path in the form definition to this element.
+   * 
+   * @return string
+   */
+  public function getLocation() {
+    $index = $this->getIndex();
+    return isset($index) ? "{$this->parent->getLocation()}[$index]": '';
+  }
 
   /**
    *
