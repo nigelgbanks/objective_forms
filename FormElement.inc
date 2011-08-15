@@ -21,12 +21,14 @@ class FormElement implements ArrayAccess {
    * @var array
    */
   protected $protected;
+
   /**
    * Child Form Elements
    * 
    * @var array
    */
   public $children;
+
   /**
    * Child Form Controls.
    * 
@@ -131,6 +133,19 @@ class FormElement implements ArrayAccess {
       }
     }
     return NULL;
+  }
+
+  /**
+   *
+   * @return array
+   */
+  public function flatten() {
+    $elements = array();
+    $elements[$this->hash] = $this;
+    foreach ($this->children as $child) {
+      $elements = array_merge($elements, $child->flatten());
+    }
+    return $elements;
   }
 
   /**
@@ -418,7 +433,7 @@ class FormElement implements ArrayAccess {
     }
     return NULL;
   }
-  
+
   /**
    * Gets the full path in the form definition to this element.
    * 
@@ -426,7 +441,7 @@ class FormElement implements ArrayAccess {
    */
   public function getLocation() {
     $index = $this->getIndex();
-    return isset($index) ? "{$this->parent->getLocation()}[$index]": '';
+    return isset($index) ? "{$this->parent->getLocation()}[$index]" : '';
   }
 
   /**
