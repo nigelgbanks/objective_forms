@@ -187,7 +187,7 @@ class FormElement implements ArrayAccess {
   public function eachChild($function) {
     $param_arr = array_slice(func_get_args(), 1); // Remove function name from the argument list
     foreach ($this->children as $child) {
-      $args = array_merge((array) $child, $param_arr);
+      $args = array_merge(array($child), $param_arr);
       if (call_user_func_array($function, $args) === FALSE) {
         return FALSE;
       }
@@ -237,7 +237,7 @@ class FormElement implements ArrayAccess {
   public function eachDecendant($function) {
     $param_arr = array_slice(func_get_args(), 1); // Remove function name from the argument list
     foreach ($this->children as $child) {
-      $args = array_merge(array($key, &$control), $param_arr);
+      $args = array_merge(array($child), $param_arr);
       if (call_user_func_array($function, $args) === FALSE) {
         return FALSE; // End processing
       }
@@ -262,12 +262,11 @@ class FormElement implements ArrayAccess {
    * @return boolean
    *   TRUE if the function was called for all decendants, FALSE otherwise.
    */
-  public function each($user_func) {
-    $original_args = func_get_args();
-    $user_func_args = $original_args;
-    array_shift($user_func_args); // Remove user function from argument list.
-    if ($this->callUserFunction($user_func, $this, $user_func_args) === TRUE) {
-      return call_user_func_array(array($this, 'eachDecendant'), $original_args);
+  public function each($function) {
+    $param_arr = array_slice(func_get_args(), 1); // Remove function name from the argument list
+    $args = array_merge(array($this), $param_arr);
+    if (call_user_func_array($function, $args) === TRUE) {
+      return call_user_func_array(array($this, 'eachDecendant'), func_get_args());
     }
     return FALSE;
   }
@@ -531,7 +530,7 @@ class FormElement implements ArrayAccess {
   private function addControlsToArray(array &$output) {
     foreach ($this->controls as $name => $value) {
       $has_property_interface = has_interface($value, 'FormPropertyInterface');
-      $output[$name] = $has_property_interface ? $value->asDrupalFormProperty() : $value;
+      $output[$name] = $has_property_interface ? $value->toDrupalForm() : $value;
     }
   }
 

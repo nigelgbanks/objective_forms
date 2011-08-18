@@ -14,16 +14,17 @@
 interface FormPropertyInterface {
 
   /**
-   * Creates the FormProperty object from its drupal form property value.
+   * Creates the FormProperty object from its scalar or array Drupal Form Property value.
    * 
    * @param mixed $value
    */
   public function __construct($value);
 
   /**
-   * Converts this object to a drupal form property value.
+   * Converts this object to a Drupal Form Property value.
    * 
    * @return mixed
+   *   Returns a scalar or array repersentation of this class, which can be used within a Drupal Form.
    */
-  public function asDrupalFormProperty();
+  public function toDrupalForm();
 }
