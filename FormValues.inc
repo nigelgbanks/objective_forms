@@ -22,6 +22,7 @@ class FormValues {
    * @var array
    */
   protected $values;
+
   /**
    * A helper class that helps determine what values are associated with what elements.
    * 
@@ -95,11 +96,11 @@ class FormValues {
   }
 
   /**
-   * Get the value associated with the given array &.
+   * Get the value associated with the given element.
    * 
    * @param hash $hash
    * @return mixed
-   *   The submitted value for the given array & if found otherwise NULL.
+   *   The submitted value for the given element if found otherwise NULL.
    */
   public function getValue($hash) {
     if ($this->hasValue($hash)) {

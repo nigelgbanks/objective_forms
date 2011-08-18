@@ -21,12 +21,14 @@ class FormValueTracker {
    * @var array 
    */
   public $values;
+
   /**
    * A reference to a position in $values.
    * 
    * @var mixed
    */
   protected $current;
+
   /**
    * TRUE if we are tracking a location in the values array, FALSE if not.
    * 
@@ -55,6 +57,7 @@ class FormValueTracker {
    *   Submitted value for the given FormElement if found, NULL otherwise.
    */
   public function getValue(array &$element) {
+    module_load_include('inc', 'objective_forms', 'FormElementRegistry');
     $value = $this->track($element);
     return is_array($value) ? NULL : $value; // Array's are roots of #tree branchs
   }
@@ -71,7 +74,7 @@ class FormValueTracker {
     }
     else if (isset($element['#hash'])) {
       $found = FormElementRegistry::getInstance()->get($element['#hash']);
-      if($found) {
+      if ($found) {
         return $found->getIndex();
       }
     }
@@ -84,7 +87,6 @@ class FormValueTracker {
    * @param array $element 
    */
   private function track(array &$element) {
-    $that = $this;
     if ($this->shouldStartTracking($element)) {
       $this->track = true;
     }
@@ -93,7 +95,7 @@ class FormValueTracker {
       $this->reset();
     }
     $index = $this->getIndex($element);
-    if ($this->track && isset($this->current[$index]) && is_array($this->current[$index])) {
+    if ($this->track && isset($this->current[$index])) {
       $this->current = &$this->current[$index];
       return $this->current;
     }

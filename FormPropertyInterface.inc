@@ -5,6 +5,7 @@
 /**
  * @file
  *
+ * Defines an Interface for converting FormElement properties dynamically into Object and back into Scalar Values
  */
 
 /**
@@ -24,5 +25,5 @@ interface FormPropertyInterface {
    * 
    * @return mixed
    */
-  public function getValue();
+  public function asDrupalFormProperty();
 }
