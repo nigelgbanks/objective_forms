@@ -45,7 +45,10 @@ class FormPopulator {
     $children = element_children($form);
     foreach ($children as $key) {
       $child = &$form[$key];
-      $child['#default_value'] = isset($element['#hash']) ? $this->values->getValue($element['#hash']) : NULL;
+      $default_value = isset($child['#hash']) ? $this->values->getValue($child['#hash']) : NULL;
+      if (isset($default_value)) { // We must check that it is set so that newly created elements aren't overwritten.
+        $child['#default_value'] = $default_value;
+      }
       $this->populate($child); // Recurse...
     }
     return $form;
