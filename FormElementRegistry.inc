@@ -54,7 +54,7 @@ class FormElementRegistry {
    * Create the FormElementRegistry singleton.
    */
   private static function create() {
-    if (FormStorage::isInitialized()) { // This block doesn't get run during unit tests. But should during normal use.
+    if (FormStorage::exists()) { // This block doesn't get run during unit tests. But should during normal use.
       $storage = FormStorage::getInstance();
       self::$instance = isset($storage->elementRegistry) ? $storage->elementRegistry : new FormElementRegistry();
       $storage->elementRegistry = self::$instance;

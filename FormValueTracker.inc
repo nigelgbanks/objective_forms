@@ -5,13 +5,16 @@
 /**
  * @file
  *
+ * Defines the FormValueTracker class that is used by only the FormValues class. 
+ * 
  */
 module_load_include('inc', 'objective_forms', 'FormElement');
 module_load_include('inc', 'objective_forms', 'FormElementRegistry');
 
 /**
  * This class utilizes scope and a reference pointer to track where 
- * the current value for a given FormElement. 
+ * the current value for a given FormElement. Its used by the Form values
+ * class where it is used to retrieve all the values of FormElements.
  */
 class FormValueTracker {
 
@@ -37,7 +40,7 @@ class FormValueTracker {
   protected $track;
 
   /**
-   * Creates a FormValues object.
+   * Creates a FormValues instance.
    * 
    * @param array $values 
    */
@@ -53,6 +56,8 @@ class FormValueTracker {
    * Tracks the current position in the $values array if applicable.
    * 
    * @param array $element
+   *   An element in the Drupal Form.
+   * 
    * @return mixed 
    *   Submitted value for the given FormElement if found, NULL otherwise.
    */
@@ -66,6 +71,10 @@ class FormValueTracker {
    * Get this elements index in its parent.
    * 
    * @param array $element 
+   *   An element in the Drupal Form.
+   * 
+   * @return mixed
+   *   The index of the element if found, NULL otherwise.
    */
   private function getIndex(array &$element) {
     if (isset($element['#array_parents'])) {
@@ -82,9 +91,13 @@ class FormValueTracker {
   }
 
   /**
-   * Update the $current pointer so that it is pointing at the correct value.
+   * Update the $current pointer so that it is pointing at the correct value. Return the current position.
    * 
    * @param array $element 
+   *   An element in the Drupal Form.
+   * 
+   * @return mixed
+   *   The value of the current position in the values tree. Typically a array or a scalar value.
    */
   private function track(array &$element) {
     if ($this->shouldStartTracking($element)) {
@@ -106,6 +119,8 @@ class FormValueTracker {
    * Checks if the tracker should begin tracking.
    * 
    * @param array $element
+   *   An element in the Drupal Form.
+   * 
    * @return boolean 
    *   TRUE if the tracker should start to track values, FALSE if it is already tracking or shouldn't start tracking.
    */
@@ -117,6 +132,8 @@ class FormValueTracker {
    * Checks if the tracker should stop tracking.
    * 
    * @param array $element
+   *   An element in the Drupal Form.
+   * 
    * @return boolean 
    *   TRUE if the tracker should stop tracking values, FALSE if it is not tracking or should continue tracking.
    */

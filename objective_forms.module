@@ -5,7 +5,7 @@
 /**
  * @file
  * 
- * Place holder, for the moment objective forms doesn't rely on any hooks, or cached data.
+ *
  */
 
 /**
@@ -57,14 +57,6 @@ function objective_forms_set_default_values(array &$form, array &$form_state) {
  * !TEST CODE -- Needed for some Simple Tests! 
  */
 function objective_forms_menu() {
-  $items['objective/forms/test'] = array(
-    'title' => 'Human test form.',
-    'description' => 'Test form',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('objective_forms_human_test'),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
   $items['objective/forms/test/%'] = array(
     'title' => 'Test Form Used By SimpleTest',
     'description' => 'menu_item_description',
@@ -102,60 +94,6 @@ function objective_forms_test_load_files() {
     }
     closedir($dir);
   }
-}
-
-/**
- *
- * @param array $form_state 
- */
-function objective_forms_human_test(array &$form_state) {
-  $drupal_form = array(
-    'field' => array(
-      '#type' => 'fieldset',
-      '#prefix' => "<div id='field'>",
-      '#suffix' => '</div>',
-      '#hash' => '0',
-      'first' => array(
-        '#type' => 'textfield',
-        '#title' => 'first',
-        '#hash' => '1',
-      )
-    ),
-    'ahah' => array(
-      '#type' => 'button',
-      '#value' => 'ahah',
-      '#ahah' => array(
-        'path' => "xml/form/elements/ahah/duplicate/1/0",
-        'wrapper' => 'field', // The parents wrapper is set to the parents hash.
-        'method' => 'replace',
-        'effect' => 'fade'
-      )
-    ),
-    'submit' => array(
-      '#type' => 'submit',
-      '#value' => 'Submit'
-    )
-  );
-  $form = new Form($drupal_form, $form_state);
-  return $form->toArray();
-}
-
-/**
- *
- * @param array $form
- * @param array $form_state 
- */
-function objective_forms_human_test_validate(array $form, array &$form_state) {
-  
-}
-
-/**
- *
- * @param array $form
- * @param array $form_state 
- */
-function objective_forms_human_test_submit(array $form, array &$form_state) {
-  
 }
 
 /**

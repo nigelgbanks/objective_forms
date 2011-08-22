@@ -15,7 +15,7 @@ module_load_include('inc', 'objective_forms', 'FormElementRegistry');
 module_load_include('inc', 'objective_forms', 'FormPopulator');
 
 /**
- * An collection object that comprises all the FormElements in a form.
+ * A Container for all the FormElements that comprise the form.
  */
 class Form implements ArrayAccess {
 
@@ -55,7 +55,7 @@ class Form implements ArrayAccess {
    */
   public function __construct(array $form, array &$form_state) {
     $this->form_state = &$form_state;
-    $this->storage = FormStorage::initialize($form_state);
+    $this->storage = FormStorage::create($form_state);
     $this->registry = FormElementRegistry::getInstance();
     $this->root = new FormElement($form);
   }

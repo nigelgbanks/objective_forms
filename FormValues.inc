@@ -5,14 +5,14 @@
 /**
  * @file
  *
- * Associates submitted form values with array &s.
+ * Associates submitted form values with array.
  */
 module_load_include('inc', 'objective_forms', 'FormValueTracker');
 module_load_include('inc', 'php_lib', 'DrupalFormHelpers');
 
 /**
  * This class stores all submitted values. It provides a mechanism for 
- * accessing submitted values.
+ * accessing submitted values with the FormElements hashes.
  */
 class FormValues {
 
@@ -34,18 +34,22 @@ class FormValues {
    * Checks to see if any form values were submitted to the server.
    * 
    * @param array $form_state
+   *   The Drupal Form State.
+   * 
    * @return boolean
+   *   TRUE if $form_state['values'] exists, FALSE otherwise.
    */
   public static function Exists(array &$form_state) {
     return isset($form_state['values']);
   }
 
   /**
-   * Create a FormValues object.
+   * Create a FormValues instance.
    * 
    * @param array $form_state
    *   Drupal Form state.
-   * @param array $root 
+   * 
+   * @param array $root
    *   The elements to associate with submitted values.
    */
   public function __construct(array &$form_state, array &$root) {
@@ -57,11 +61,13 @@ class FormValues {
   }
 
   /**
-   * Store values.
+   * Utilizes the FormValueTracker to store all the submitted values.
    * 
    * @param array $element
-   *   Element to store value for,
-   * @param FormValueTracker $tracker 
+   *   An element in the Drupal Form.
+   * 
+   * @param FormValueTracker $tracker
+   *   A helper class for extracting submitted values.
    */
   private function setValues(array &$element, FormValueTracker $tracker) {
     $this->setValue($element, $tracker);
@@ -76,7 +82,10 @@ class FormValues {
    * Associate the given array &, with a submitted value.
    * 
    * @param array $element
+   *   An element in the Drupal Form.
+   * 
    * @param FormValueTracker $tracker 
+   *   A helper class for extracting submitted values.
    */
   private function setValue(array &$element, FormValueTracker $tracker) {
     $value = $tracker->getValue($element);
@@ -89,7 +98,10 @@ class FormValues {
    * Is there a value associated with the given form element.
    * 
    * @param hash $hash 
+   *   The unique #hash property that identifies the FormElement.
+   * 
    * @return boolean
+   *   TRUE if there is a value for the given FormElement.
    */
   public function hasValue($hash) {
     return isset($this->values[$hash]);
@@ -99,8 +111,10 @@ class FormValues {
    * Get the value associated with the given element.
    * 
    * @param hash $hash
+   *   The unique #hash property that identifies the FormElement.
+   * 
    * @return mixed
-   *   The submitted value for the given element if found otherwise NULL.
+   *   The submitted value for the given element if found, NULL otherwise.
    */
   public function getValue($hash) {
     if ($this->hasValue($hash)) {
@@ -113,6 +127,7 @@ class FormValues {
    * Returns all values.
    * 
    * @return array 
+   *   The keys of the array are the FormElement's hashs, and the values are the submitted form values.
    */
   public function getValues() {
     return $this->values;
