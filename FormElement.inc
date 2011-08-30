@@ -283,11 +283,11 @@ class FormElement implements ArrayAccess {
     if ($this->protected->has($name)) {
       return $this->protected->$name;
     }
-    else if ($this->offsetExists($name)) { // Child
-      return $this->offsetGet($name);
-    }
     else if ($this->offsetExists("#$name")) { // Control
       return $this->offsetGet("#$name");
+    }
+    else if ($this->offsetExists($name)) { // Child
+      return $this->offsetGet($name);
     }
     return NULL;
   }
