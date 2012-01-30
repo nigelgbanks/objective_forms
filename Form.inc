@@ -46,16 +46,21 @@ class Form implements ArrayAccess {
   public $root;
 
   /**
-   * Instantiate's a Form.
+   * Instantiate a Form.
    * 
    * @param array $form
+   *   The drupal form.
    * @param array $form_state 
+   *   The drupal form state.
    */
   public function __construct(array $form, array &$form_state) {
     $this->form_state = &$form_state;
     $this->storage = FormStorage::create($form_state);
-    $this->registry = FormElementRegistry::getInstance();
-    $this->root = new FormElement($form);
+    $this->storage->elementRegistry = isset($this->storage->elementRegistry) ?
+        $this->storage->elementRegistry :
+        new FormElementRegistry();
+    $this->registry = $this->storage->elementRegistry;
+    $this->root = new FormElement($this->registry, $form);
   }
 
   /**
@@ -161,7 +166,7 @@ class Form implements ArrayAccess {
    */
   public function toArray(array &$form_state) {
     $form = $this->root->toArray();
-    if (isset($this->form_state['values'])) {
+    if (isset($this->form_state['values'])) { //@todo see if its nesscary to store this varible with the instance.
       module_load_include('inc', 'objective_forms', 'FormPopulator');
       $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
       $populator->populate($form);
