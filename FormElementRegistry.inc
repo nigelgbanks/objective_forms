@@ -35,7 +35,7 @@ class FormElementRegistry {
   /**
    * Instantiate the FormElementRegistry.
    */
-  private function __construct() {
+  public function __construct() {
     $this->elements = array();
     $this->cloned = array();
   }

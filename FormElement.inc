@@ -137,7 +137,7 @@ class FormElement implements ArrayAccess {
     }
     if ($this->registry) { // Deals with this case this class is used in a non user context ....
       $this->registry->registerClone($original_hash, $this);
-    }
+    } 
   }
 
   /**
