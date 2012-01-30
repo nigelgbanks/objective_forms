@@ -18,13 +18,6 @@ module_load_include('inc', 'objective_forms', 'FormPopulator');
 class Form implements ArrayAccess {
 
   /**
-   * The Drupal form_state.
-   * 
-   * @var array
-   */
-  public $form_state;
-
-  /**
    * Stores persistent data.
    * 
    * @var FormStorage
@@ -54,7 +47,6 @@ class Form implements ArrayAccess {
    *   The drupal form state.
    */
   public function __construct(array $form, array &$form_state) {
-    $this->form_state = &$form_state;
     $this->storage = new FormStorage($form_state);
     $this->storage->elementRegistry = isset($this->storage->elementRegistry) ?
         $this->storage->elementRegistry :
@@ -166,7 +158,7 @@ class Form implements ArrayAccess {
    */
   public function toArray(array &$form_state) {
     $form = $this->root->toArray();
-    if (isset($this->form_state['values'])) { //@todo see if its nesscary to store this varible with the instance.
+    if (isset($form_state['values'])) { //@todo see if its nesscary to store this varible with the instance.
       module_load_include('inc', 'objective_forms', 'FormPopulator');
       $populator = new FormPopulator(new FormValues($form_state, $form, $this->registry), $form_state);
       $populator->populate($form);
