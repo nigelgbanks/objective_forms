@@ -8,10 +8,10 @@ module_load_include('inc', 'php_lib', 'Array');
 
 /**
  * Recursively searches the Drupal form for the element with the given hash.
- * 
- * @param array $form 
+ *
+ * @param array $form
  *   The Drupal Form.
- * 
+ *
  * @param hash $hash
  *   The unique #hash property that identifies the FormElement.
  */
@@ -24,12 +24,12 @@ function &find_element(array &$form, $hash) {
 
 /**
  * Recursively searches the Drupal Form elements children for the element that matches the given hash.
- * 
+ *
  * @param array $form
  *   A Drupal Form Element.
  * @param hash $hash
  *   The unique #hash property that identifies the FormElement.
- * 
+ *
  * @return array
  *   The drupal form element whos #hash matches that of the given $hash value.
  */
@@ -47,14 +47,14 @@ function &find_child_element(array &$form, $hash) {
 }
 
 /**
- * Checks to see if the given drupal form element has a #hash property and checks 
+ * Checks to see if the given drupal form element has a #hash property and checks
  * to see if it matches the given hash.
- * 
+ *
  * @param array $element
  *   A Drupal Form Element.
  * @param hash $hash
  *   The unique #hash property that identifies the FormElement.
- * 
+ *
  * @return boolean
  *   TRUE if the given element's hash matches, FALSE otherwise.
  */
@@ -67,15 +67,15 @@ function has_hash(array &$element, $hash) {
 
 /**
  * Gets the drupal form element name for the given element if possible.
- * 
+ *
  * Only works on processed form elements.
- * 
- * The name of the form element is based on the #parents property of your form element. 
+ *
+ * The name of the form element is based on the #parents property of your form element.
  * If it is array('foo', 'bar', 'baz') then 'foo][bar][baz' is the elements name.
- * 
+ *
  * @param array $element
  *   The Drupal form element.
- * 
+ *
  * @return string
  *   The Drupal style name for the given form element if possible, FALSE otherwise.
  */
@@ -87,15 +87,15 @@ function form_element_name(array $element) {
 }
 
 /**
- * Compares two Drupal form element names to determine if the second 
+ * Compares two Drupal form element names to determine if the second
  * argument is a child element of the first.
- * 
+ *
  * @param string $parent
  *   A Drupal form element name for the assumed parent form element.
- * 
+ *
  * @param string $child
  *   A Drupal form element name for the assumed child form element.
- * 
+ *
  * @return boolean
  *   TRUE if the given element
  */

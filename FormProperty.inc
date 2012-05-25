@@ -13,12 +13,12 @@ class FormProperty {
 
   /**
    * Asks all the installed modules if they define any FormProperty classes.
-   * 
+   *
    * @staticvar array $cache
    *   For each request $cache the results.
-   * 
+   *
    * @return array
-   *   An array of information required to instantiate FormProperty classes where the names of the form properties 
+   *   An array of information required to instantiate FormProperty classes where the names of the form properties
    *   are the keys in the array.
    */
   public static function GetRegisteredFormPropertiesTypes() {
@@ -37,10 +37,10 @@ class FormProperty {
 
   /**
    * Checks if a given form property has a registered class.
-   * 
+   *
    * @param string $name
    *   Name of the FormProperty we are looking for.
-   * 
+   *
    * @return boolean
    *   TRUE if there is a registered class for the given form property.
    */
@@ -51,10 +51,10 @@ class FormProperty {
 
   /**
    * Gets the required information for loading and creating a given FormProperty identified by $name.
-   * 
+   *
    * @param string $name
    *   Name of the FormProperty we are looking for.
-   * 
+   *
    * @return array
    *   The required information for loading and creating a given FormProperty if defined for the property $name.
    */
@@ -70,8 +70,8 @@ class FormProperty {
    * Loads the file where the FormProperty class exists.
    *
    * If the FormProperty type is not defined it does nothing.
-   * 
-   * @param string $name 
+   *
+   * @param string $name
    *   Name of the FormProperty to create.
    */
   public static function LoadFile($name) {
@@ -83,12 +83,12 @@ class FormProperty {
 
   /**
    * Creates a FormProperty object and initializes it with the provided $value.
-   * 
+   *
    * @param string $name
    *   Name of the FormProperty to create.
    * @param mixed $value
    *   Value to initialize the generated FormProperty object with.
-   * 
+   *
    * @return object
    */
   public static function Create($name, $value) {
@@ -102,12 +102,12 @@ class FormProperty {
 
   /**
    * Creates a FormProperty Object if one is defined by $name, otherwise $value is returned.
-   * 
+   *
    * @param string $name
    *   Name of the FormProperty to create.
    * @param mixed $value
    *   The value of the form property.
-   * 
+   *
    * @return mixed
    *   If a FormProperty class is defined for $name, then a FormProperty object is returned, otherwise the parameter
    *   $value is returned.

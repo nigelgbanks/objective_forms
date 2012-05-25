@@ -3,7 +3,7 @@
 /**
  * @file
  *
- * Defines a class that can be used to dynamically populate the default values of a Drupal Form, from the submitted 
+ * Defines a class that can be used to dynamically populate the default values of a Drupal Form, from the submitted
  * POST data.
  */
 module_load_include('inc', 'objective_forms', 'FormValues');
@@ -15,14 +15,14 @@ class FormPopulator {
 
   /**
    * The submitted POST data.
-   * 
+   *
    * @var FormValues
    */
   protected $values;
 
   /**
    * Instantiates a FormPopulator.
-   * 
+   *
    * @param FormValues
    *  The submitted POST data.
    */
@@ -32,11 +32,11 @@ class FormPopulator {
 
   /**
    * Populates a Drupal Form's elements #default_value properties with POST data.
-   * 
+   *
    * @param array $form
    *   The Drupal Form to populate
-   * 
-   * @return 
+   *
+   * @return
    *   The populated Drupal Form.
    */
   public function populate(array &$form) {

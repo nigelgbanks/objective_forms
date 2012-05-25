@@ -3,14 +3,14 @@
 /**
  * @file
  *
- * Defines the FormValueTracker class that is used by only the FormValues class. 
- * 
+ * Defines the FormValueTracker class that is used by only the FormValues class.
+ *
  */
 module_load_include('inc', 'objective_forms', 'FormElement');
 module_load_include('inc', 'objective_forms', 'FormElementRegistry');
 
 /**
- * This class utilizes scope and a reference pointer to track where 
+ * This class utilizes scope and a reference pointer to track where
  * the current value for a given FormElement. Its used by the Form values
  * class where it is used to retrieve all the values of FormElements.
  */
@@ -18,36 +18,36 @@ class FormValueTracker {
 
   /**
    * Submitted values from the form. A reference to $form_state['values'].
-   * 
-   * @var array 
+   *
+   * @var array
    */
   protected $values;
 
   /**
    * The form element registry used to get properties for given form elements.
-   * 
-   * @var FormElementRegistry 
+   *
+   * @var FormElementRegistry
    */
   protected $registry;
 
   /**
    * A reference to a position in $values.
-   * 
+   *
    * @var mixed
    */
   protected $current;
 
   /**
    * TRUE if we are tracking a location in the values array, FALSE if not.
-   * 
-   * @var boolean 
+   *
+   * @var boolean
    */
   protected $track;
 
   /**
    * Creates a FormValues instance.
-   * 
-   * @param array $values 
+   *
+   * @param array $values
    */
   public function __construct(array &$values, FormElementRegistry $registry) {
     $this->values = &$values;
@@ -58,13 +58,13 @@ class FormValueTracker {
 
   /**
    * Gets the value for a given FormElement.
-   * 
+   *
    * Tracks the current position in the $values array if applicable.
-   * 
+   *
    * @param array $element
    *   An element in the Drupal Form.
-   * 
-   * @return mixed 
+   *
+   * @return mixed
    *   Submitted value for the given FormElement if found, NULL otherwise.
    */
   public function getValue(array &$element) {
@@ -75,10 +75,10 @@ class FormValueTracker {
 
   /**
    * Get this elements index in its parent.
-   * 
-   * @param array $element 
+   *
+   * @param array $element
    *   An element in the Drupal Form.
-   * 
+   *
    * @return mixed
    *   The index of the element if found, NULL otherwise.
    */
@@ -98,10 +98,10 @@ class FormValueTracker {
 
   /**
    * Update the $current pointer so that it is pointing at the correct value. Return the current position.
-   * 
-   * @param array $element 
+   *
+   * @param array $element
    *   An element in the Drupal Form.
-   * 
+   *
    * @return mixed
    *   The value of the current position in the values tree. Typically a array or a scalar value.
    */
@@ -123,11 +123,11 @@ class FormValueTracker {
 
   /**
    * Checks if the tracker should begin tracking.
-   * 
+   *
    * @param array $element
    *   An element in the Drupal Form.
-   * 
-   * @return boolean 
+   *
+   * @return boolean
    *   TRUE if the tracker should start to track values, FALSE if it is already tracking or shouldn't start tracking.
    */
   private function shouldStartTracking(array &$element) {
@@ -136,11 +136,11 @@ class FormValueTracker {
 
   /**
    * Checks if the tracker should stop tracking.
-   * 
+   *
    * @param array $element
    *   An element in the Drupal Form.
-   * 
-   * @return boolean 
+   *
+   * @return boolean
    *   TRUE if the tracker should stop tracking values, FALSE if it is not tracking or should continue tracking.
    */
   private function shouldStopTracking(array &$element) {

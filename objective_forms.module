@@ -2,57 +2,57 @@
 
 /**
  * @file
- * 
+ *
  * @todo include access to the form for all elements so that these hooks can have the appropriate values.
  */
 
 /**
  * Implements form_element_created hook.
- * 
- * @param FormElement $form_element 
  *
-function objective_forms_form_element_created(FormElement $form_element) {
-  module_load_include('inc', 'objective_forms', 'FormElementRegistry');
-  $registry = FormElementRegistry::getInstance();
-  $registry->registerCreated($form_element);
-}
+ * @param FormElement $form_element
+ *
+ function objective_forms_form_element_created(FormElement $form_element) {
+ module_load_include('inc', 'objective_forms', 'FormElementRegistry');
+ $registry = FormElementRegistry::getInstance();
+ $registry->registerCreated($form_element);
+ }
 
-/**
+ /**
  * Implements form_element_cloned hook.
- * 
+ *
  * @param hash $original_hash
  * @param FormElement $clone
  *
-function objective_forms_form_element_cloned($original_hash, FormElement $clone) {
-  module_load_include('inc', 'objective_forms', 'FormElementRegistry');
-  $registry = FormElementRegistry::getInstance();
-  $registry->registerClone($original_hash, $clone);
-}
+ function objective_forms_form_element_cloned($original_hash, FormElement $clone) {
+ module_load_include('inc', 'objective_forms', 'FormElementRegistry');
+ $registry = FormElementRegistry::getInstance();
+ $registry->registerClone($original_hash, $clone);
+ }
 
-/**
+ /**
  *
  * @param hash $hash
  *
-function objective_forms_form_element_destroyed($hash) {
-  module_load_include('inc', 'objective_forms', 'FormElementRegistry');
-  $registry = FormElementRegistry::getInstance();
-  $registry->registerDestroyed($hash); // Will never get called cause the Registry holds a reference to that element.
-}
+ function objective_forms_form_element_destroyed($hash) {
+ module_load_include('inc', 'objective_forms', 'FormElementRegistry');
+ $registry = FormElementRegistry::getInstance();
+ $registry->registerDestroyed($hash); // Will never get called cause the Registry holds a reference to that element.
+ }
 
-/**
+ /**
  * Uses submitted post data to set the default values for the form.
  *
-function objective_forms_set_default_values(array &$form, array &$form_state) {
-  if (isset($form_state['values'])) {
-    module_load_include('inc', 'objective_forms', 'FormPopulator');
-    $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
-    $populator->populate($form);
-  }
-  return $form;
-}
+ function objective_forms_set_default_values(array &$form, array &$form_state) {
+ if (isset($form_state['values'])) {
+ module_load_include('inc', 'objective_forms', 'FormPopulator');
+ $populator = new FormPopulator(new FormValues($form_state, $form), $form_state);
+ $populator->populate($form);
+ }
+ return $form;
+ }
 
-/**
- * !TEST CODE -- Needed for some Simple Tests! 
+ /**
+ * !TEST CODE -- Needed for some Simple Tests!
  */
 function objective_forms_menu() {
   $items['objective/forms/test/%'] = array(
@@ -68,12 +68,13 @@ function objective_forms_menu() {
 
 /**
  * Load a test form.
- * 
+ *
  * @param string $form_name
  * @return html
  */
 function objective_forms_test($form_name) {
   objective_forms_test_load_files(); // Load all test files
+  // TODO  needs to have $form as its first parameter.
   return drupal_get_form($form_name);
 }
 
@@ -87,7 +88,7 @@ function objective_forms_test_load_files() {
   if ($dir !== false) {
     while (($file = readdir($dir)) !== false) {
       if (preg_match('/\.test$/', $file)) {
-        require_once "$include_path/$file";
+        require_once DRUPAL_ROOT . '/' . "$include_path/$file";
       }
     }
     closedir($dir);

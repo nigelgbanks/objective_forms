@@ -3,7 +3,7 @@
 /**
  * @file
  *
- * Defines a class that is used to persist data for Drupal Forms across requests. 
+ * Defines a class that is used to persist data for Drupal Forms across requests.
  */
 
 /**
@@ -17,14 +17,14 @@ class FormStorage {
 
   /**
    * A reference to $form_state['storage'][STORAGE_ROOT], this is where all persistant data is kept.
-   * 
+   *
    * @var array
    */
   protected $storage;
 
   /**
    * Creates the FormStorage Singleton
-   * 
+   *
    * @param array $form_state
    *   The Drupal Form State.
    */
@@ -35,9 +35,9 @@ class FormStorage {
 
   /**
    * Creates the storage slot in the Drupal form state.
-   * 
+   *
    * @param array $form_state
-   *   The Drupal Form State. 
+   *   The Drupal Form State.
    */
   private function initializeFormState(array &$form_state) {
     if (empty($form_state['storage'])) {
@@ -50,10 +50,10 @@ class FormStorage {
 
   /**
    * Checks storage for the existance of a variable.
-   * 
+   *
    * @param string $name
    *   The stored variables name.
-   * 
+   *
    * @return boolean
    *   TRUE if the variable exists in storage, FALSE otherwise.
    */
@@ -63,7 +63,7 @@ class FormStorage {
 
   /**
    * Removes a variable from storage.
-   * 
+   *
    * @param string $name
    *   The stored variables name.
    */
@@ -73,11 +73,11 @@ class FormStorage {
 
   /**
    * Get a value from storage.
-   * 
+   *
    * @param mixed $name
    *   The stored variables name.
-   * 
-   * @return mixed 
+   *
+   * @return mixed
    *   The stored variables value.
    */
   public function __get($name) {
@@ -89,7 +89,7 @@ class FormStorage {
 
   /**
    * Store a value.
-   * 
+   *
    * @param mixed $name
    *   The stored variables name.
    * @param mixed $value
