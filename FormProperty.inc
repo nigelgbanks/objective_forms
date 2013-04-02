@@ -119,9 +119,7 @@ class FormProperty {
     }
     
     if(is_array($value)) {
-      foreach($value as $key => $val) {
-        $value[trim($key)] = trim($val);
-      }
+      array_walk($value, 'trim');
     }
     else {
       $value = trim($value);
