@@ -11,10 +11,12 @@ env:
 before_install:
   - cd $HOME
   - git clone -b 7.x git://github.com/Islandora/islandora.git
+  - git clone -b 7.x git://github.com/Islandora/php_lib.git
   - export ISLANDORA_DIR=$HOME/islandora
   - $HOME/islandora/tests/scripts/travis_setup.sh
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/objective_forms
+  - ln -s $HOME/islandora_solr_search sites/all/modules/php_lib
   - drush en --yes --user=1 objective_forms
 script:
   - ant -buildfile sites/all/modules/objective_forms/build.xml lint
