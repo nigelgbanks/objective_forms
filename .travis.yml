@@ -23,4 +23,4 @@ script:
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/objective_forms
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer objective_forms
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/objective_forms
-  - drush test-run --uri=http://localhost:8081 "Objective Forms"
+  - drush test-run --user=1 --uri=http://localhost:8081 "Objective Forms"
