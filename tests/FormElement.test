@@ -208,7 +208,7 @@ class ObjectiveFormElementTestCase extends DrupalUnitTestCase {
    */
   // @codingStandardsIgnoreStart
   // don't know if this functin is being call all over the place
-  protected function _testEachChild(FormElement $child, $property_name, $property_value) {
+  public function _testEachChild(FormElement $child, $property_name, $property_value) {
     $child[$property_name] = $property_value;
   }
   // @codingStandardsIgnoreEnd
