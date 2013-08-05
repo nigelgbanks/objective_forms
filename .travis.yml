@@ -17,6 +17,7 @@ before_install:
   - cd $HOME/drupal-*
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/objective_forms
   - ln -s $HOME/islandora_solr_search sites/all/modules/php_lib
+  - drush en --yes --user=1 php_lib
   - drush en --yes --user=1 objective_forms
 script:
   - ant -buildfile sites/all/modules/objective_forms/build.xml lint
